@@ -1,0 +1,211 @@
+/*--------------------------------------------------------------------------------------
+ *  © 2026 GoAnon. All rights reserved.
+ *  Licensed under the Apache License, Version 2.0. See LICENSE.txt for more information.
+ *--------------------------------------------------------------------------------------*/
+
+import { URI } from '../../../../base/common/uri.js';
+import { EtheranaFileSnapshot } from './editCodeServiceTypes.js';
+import { ToolCallParams, ToolName, ToolResult } from './toolsServiceTypes.js';
+import { RawToolCallObj, RawToolParamsObj, AnthropicReasoning } from './sendLLMMessageTypes.js';
+
+export type ToolMessage<T extends ToolName> = {
+	role: 'tool';
+	content: string; // give this result to LLM (string of value)
+	id: string;
+	rawParams: RawToolParamsObj;
+	mcpServerName: string | undefined; // the server name at the time of the call
+} & (
+		// in order of events:
+		| { type: 'invalid_params', result: null, name: T, }
+
+		| { type: 'tool_request', result: null, name: T, params: ToolCallParams<T>, }  // params were validated, awaiting user
+
+		| { type: 'running_now', result: null, name: T, params: ToolCallParams<T>, }
+
+		| { type: 'tool_error', result: string, name: T, params: ToolCallParams<T>, } // error when tool was running
+		| { type: 'success', result: Awaited<ToolResult<T>>, name: T, params: ToolCallParams<T>, }
+		| { type: 'rejected', result: null, name: T, params: ToolCallParams<T> }
+	) // user rejected
+
+export type DecorativeCanceledTool = {
+	role: 'interrupted_streaming_tool';
+	name: ToolName;
+	mcpServerName: string | undefined; // the server name at the time of the call
+}
+
+
+// checkpoints
+export type CheckpointEntry = {
+	role: 'checkpoint';
+	type: 'user_edit' | 'tool_edit';
+	etheranaFileSnapshotOfURI: { [fsPath: string]: EtheranaFileSnapshot | undefined };
+
+	userModifications: {
+		etheranaFileSnapshotOfURI: { [fsPath: string]: EtheranaFileSnapshot | undefined };
+	};
+}
+
+
+// WARNING: changing this format is a big deal!!!!!! need to migrate old format to new format on users' computers so people don't get errors.
+export type ChatMessage =
+	| {
+		role: 'user';
+		content: string; // content displayed to the LLM on future calls - allowed to be '', will be replaced with (empty)
+		displayContent: string; // content displayed to user  - allowed to be '', will be ignored
+		selections: StagingSelectionItem[] | null; // the user's selection
+		state: {
+			stagingSelections: StagingSelectionItem[];
+			isBeingEdited: boolean;
+		}
+	} | {
+		role: 'assistant';
+		displayContent: string; // content received from LLM  - allowed to be '', will be replaced with (empty)
+		reasoning: string; // reasoning from the LLM, used for step-by-step thinking
+
+		anthropicReasoning: AnthropicReasoning[] | null; // anthropic reasoning
+	}
+	| ToolMessage<ToolName>
+	| PlanEntry
+	| DecorativeCanceledTool
+	| CheckpointEntry
+
+
+// one of the square items that indicates a selection in a chat bubble
+export type StagingSelectionItem = {
+	type: 'File';
+	uri: URI;
+	language: string;
+	state: { wasAddedAsCurrentFile: boolean; };
+} | {
+	type: 'CodeSelection';
+	range: [number, number];
+	uri: URI;
+	language: string;
+	state: { wasAddedAsCurrentFile: boolean; };
+} | {
+	type: 'Folder';
+	uri: URI;
+	language?: undefined;
+	state?: undefined;
+}
+
+
+// a link to a symbol (an underlined link to a piece of code)
+export type CodespanLocationLink = {
+	uri: URI, // we handle serialization for this
+	displayText: string,
+	selection?: { // store as JSON so dont have to worry about serialization
+		startLineNumber: number
+		startColumn: number,
+		endLineNumber: number
+		endColumn: number,
+	} | undefined
+} | null
+
+
+export type PlanEntry = {
+	role: 'plan';
+	id: string;
+	risk: 'low' | 'medium' | 'high';
+	summary: string;
+	filesToEdit: string[];
+	filesToNotTouch: string[];
+	commandsToRun: string[];
+	riskDetails: string;
+	isApproved: boolean;
+	checkpointAvailable: boolean;
+	modelName: string;
+	memoryIncluded: { project: boolean; terminal: boolean };
+}
+
+export type WhenMounted = {
+	textAreaRef: { current: HTMLTextAreaElement | null };
+	scrollToBottom: () => void;
+}
+
+export type ThreadType = {
+	id: string;
+	createdAt: string;
+	lastModified: string;
+	messages: ChatMessage[];
+	filesWithUserChanges: Set<string>;
+
+	state: {
+		currCheckpointIdx: number | null;
+		stagingSelections: StagingSelectionItem[];
+		focusedMessageIdx: number | undefined;
+		linksOfMessageIdx: {
+			[messageIdx: number]: {
+				[codespanName: string]: CodespanLocationLink
+			}
+		}
+		mountedInfo?: {
+			whenMounted: Promise<WhenMounted>
+			_whenMountedResolver: (res: WhenMounted) => void
+			mountedIsResolvedRef: { current: boolean };
+		}
+		autoApprovePlanId?: string | null;
+	};
+}
+
+export type ChatThreads = {
+	[id: string]: undefined | ThreadType;
+}
+
+export type ThreadsState = {
+	allThreads: ChatThreads;
+	currentThreadId: string;
+}
+
+export type IsRunningType =
+	| 'LLM'
+	| 'tool'
+	| 'awaiting_user'
+	| 'idle'
+	| undefined
+
+export type ThreadStreamState = {
+	[threadId: string]: undefined | {
+		isRunning: undefined;
+		error?: { message: string, fullError: Error | null, };
+		llmInfo?: undefined;
+		toolInfo?: undefined;
+		interrupt?: undefined;
+	} | {
+		isRunning: 'LLM';
+		error?: undefined;
+		llmInfo: {
+			displayContentSoFar: string;
+			reasoningSoFar: string;
+			toolCallSoFar: RawToolCallObj | null;
+		};
+		toolInfo?: undefined;
+		interrupt: Promise<() => void>;
+	} | {
+		isRunning: 'tool';
+		error?: undefined;
+		llmInfo?: undefined;
+		toolInfo: {
+			toolName: ToolName;
+			toolParams: ToolCallParams<ToolName>;
+			id: string;
+			content: string;
+			rawParams: RawToolParamsObj;
+			mcpServerName: string | undefined;
+		};
+		interrupt: Promise<() => void>;
+	} | {
+		isRunning: 'awaiting_user';
+		error?: undefined;
+		llmInfo?: undefined;
+		toolInfo?: undefined;
+		interrupt?: undefined;
+	} | {
+		isRunning: 'idle';
+		error?: undefined;
+		llmInfo?: undefined;
+		toolInfo?: undefined;
+		interrupt: 'not_needed' | Promise<() => void>;
+	}
+}
+

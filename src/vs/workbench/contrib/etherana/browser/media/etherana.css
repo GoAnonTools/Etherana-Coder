@@ -1,0 +1,210 @@
+/*--------------------------------------------------------------------------------------
+ *  © 2026 GoAnon. All rights reserved.
+ *  Licensed under the Apache License, Version 2.0. See LICENSE.txt for more information.
+ *--------------------------------------------------------------------------------------*/
+
+.monaco-editor .etherana-sweepIdxBG {
+	background-color: var(--vscode-etherana-sweepIdxBG);
+}
+
+.etherana-sweepBG {
+	background-color: var(--vscode-etherana-sweepBG);
+}
+
+.etherana-highlightBG {
+	background-color: var(--vscode-etherana-highlightBG);
+}
+
+.etherana-greenBG {
+	background-color: var(--vscode-etherana-greenBG);
+}
+
+.etherana-redBG {
+	background-color: var(--vscode-etherana-redBG);
+}
+
+
+/* Renamed from etherana-watermark-button to etherana-openfolder-button */
+.etherana-openfolder-button {
+	padding: 8px 20px;
+	background-color: #306dce;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	outline: none !important;
+	box-shadow: none !important;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.etherana-openfolder-button:hover {
+	background-color: #2563eb;
+}
+
+.etherana-openfolder-button:active {
+	background-color: #2563eb;
+}
+
+/* Added for Open SSH button with slightly darker color */
+.etherana-openssh-button {
+	padding: 8px 20px;
+	background-color: #656565;
+	/* Slightly darker than the #5a5a5a in the TS file */
+	color: white;
+	border: none;
+	border-radius: 4px;
+	outline: none !important;
+	box-shadow: none !important;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.etherana-openssh-button:hover {
+	background-color: #474747;
+	/* Darker on hover */
+}
+
+.etherana-openssh-button:active {
+	background-color: #474747;
+}
+
+
+.etherana-settings-watermark-button {
+	margin: 8px 0;
+	padding: 8px 20px;
+	background-color: var(--vscode-input-background);
+	color: var(--vscode-input-foreground);
+	border: none;
+	border-radius: 4px;
+	outline: none !important;
+	box-shadow: none !important;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.etherana-settings-watermark-button:hover {
+	filter: brightness(1.1);
+}
+
+.etherana-settings-watermark-button:active {
+	filter: brightness(1.1);
+}
+
+.etherana-link {
+	color: #3b82f6;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.etherana-link:hover {
+	opacity: 80%;
+}
+
+/* styles for all containers used by void */
+.etherana-scope {
+	--scrollbar-vertical-width: 8px;
+	--scrollbar-horizontal-height: 6px;
+}
+
+/* Target both etherana-scope and all its descendants with scrollbars */
+.etherana-scope,
+.etherana-scope * {
+	scrollbar-width: thin !important;
+	scrollbar-color: var(--etherana-bg-1) var(--etherana-bg-3) !important;
+	/* For Firefox */
+}
+
+.etherana-scope::-webkit-scrollbar,
+.etherana-scope *::-webkit-scrollbar {
+	width: var(--scrollbar-vertical-width) !important;
+	height: var(--scrollbar-horizontal-height) !important;
+	background-color: var(--etherana-bg-3) !important;
+}
+
+.etherana-scope::-webkit-scrollbar-thumb,
+.etherana-scope *::-webkit-scrollbar-thumb {
+	background-color: var(--etherana-bg-1) !important;
+	border-radius: 4px !important;
+	border: none !important;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
+}
+
+.etherana-scope::-webkit-scrollbar-thumb:hover,
+.etherana-scope *::-webkit-scrollbar-thumb:hover {
+	background-color: var(--etherana-bg-1) !important;
+	filter: brightness(1.1) !important;
+}
+
+.etherana-scope::-webkit-scrollbar-thumb:active,
+.etherana-scope *::-webkit-scrollbar-thumb:active {
+	background-color: var(--etherana-bg-1) !important;
+	filter: brightness(1.2) !important;
+}
+
+.etherana-scope::-webkit-scrollbar-track,
+.etherana-scope *::-webkit-scrollbar-track {
+	background-color: var(--etherana-bg-3) !important;
+	border: none !important;
+}
+
+.etherana-scope::-webkit-scrollbar-corner,
+.etherana-scope *::-webkit-scrollbar-corner {
+	background-color: var(--etherana-bg-3) !important;
+}
+
+/* Add etherana-scrollable-element styles to match */
+.etherana-scrollable-element {
+	background-color: var(--vscode-editor-background);
+	--scrollbar-vertical-width: 14px;
+	--scrollbar-horizontal-height: 6px;
+	overflow: auto;
+	/* Ensure scrollbars are shown when needed */
+}
+
+.etherana-scrollable-element,
+.etherana-scrollable-element * {
+	scrollbar-width: thin !important;
+	/* For Firefox */
+	scrollbar-color: var(--etherana-bg-1) var(--etherana-bg-3) !important;
+	/* For Firefox */
+}
+
+.etherana-scrollable-element::-webkit-scrollbar,
+.etherana-scrollable-element *::-webkit-scrollbar {
+	width: var(--scrollbar-vertical-width) !important;
+	height: var(--scrollbar-horizontal-height) !important;
+	background-color: var(--etherana-bg-3) !important;
+}
+
+.etherana-scrollable-element::-webkit-scrollbar-thumb,
+.etherana-scrollable-element *::-webkit-scrollbar-thumb {
+	background-color: var(--etherana-bg-1) !important;
+	border-radius: 4px !important;
+	border: none !important;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
+}
+
+.etherana-scrollable-element::-webkit-scrollbar-thumb:hover,
+.etherana-scrollable-element *::-webkit-scrollbar-thumb:hover {
+	background-color: var(--etherana-bg-1) !important;
+	filter: brightness(1.1) !important;
+}
+
+.etherana-scrollable-element::-webkit-scrollbar-thumb:active,
+.etherana-scrollable-element *::-webkit-scrollbar-thumb:active {
+	background-color: var(--etherana-bg-1) !important;
+	filter: brightness(1.2) !important;
+}
+
+.etherana-scrollable-element::-webkit-scrollbar-track,
+.etherana-scrollable-element *::-webkit-scrollbar-track {
+	background-color: var(--etherana-bg-3) !important;
+	border: none !important;
+}
+
+.etherana-scrollable-element::-webkit-scrollbar-corner,
+.etherana-scrollable-element *::-webkit-scrollbar-corner {
+	background-color: var(--etherana-bg-3) !important;
+}
