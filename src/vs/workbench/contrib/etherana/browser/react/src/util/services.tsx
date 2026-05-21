@@ -55,7 +55,6 @@ import { ISearchService } from '../../../../../../services/search/common/search.
 import { IExtensionManagementService } from '../../../../../../../platform/extensionManagement/common/extensionManagement.js'
 import { IMCPService } from '../../../../common/mcpService.js';
 import { IStorageService, StorageScope } from '../../../../../../../platform/storage/common/storage.js'
-import { OPT_OUT_KEY } from '../../../../common/storageKeys.js'
 
 
 // normally to do this you'd use a useEffect that calls .onDidChangeState(), but useEffect mounts too late and misses initial state changes
@@ -420,27 +419,6 @@ export const useMCPServiceState = () => {
 
 
 
-export const useIsOptedOut = () => {
-	const accessor = useAccessor()
-	const storageService = accessor.get('IStorageService')
-
-	const getVal = useCallback(() => {
-		return storageService.getBoolean(OPT_OUT_KEY, StorageScope.APPLICATION, false)
-	}, [storageService])
-
-	const [s, ss] = useState(getVal())
-
-	useEffect(() => {
-		const disposables = new DisposableStore();
-		const d = storageService.onDidChangeValue(StorageScope.APPLICATION, OPT_OUT_KEY, disposables)(e => {
-			ss(getVal())
-		})
-		disposables.add(d)
-		return () => disposables.clear()
-	}, [storageService, getVal])
-
-	return s
-}
 
 export const useProjectMemoryState = () => {
 	const [s, ss] = useState(projectMemoryState)

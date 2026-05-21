@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------*/
 
 import React, { useMemo } from 'react';
-import { useAccessor, useSettingsState, useIsOptedOut } from '../util/services.js';
+import { useAccessor, useSettingsState } from '../util/services.js';
 import { FeatureName, featureNames, localProviderNames, nonlocalProviderNames, displayInfoOfFeatureName, displayInfoOfProviderName } from '../../../../common/etheranaSettingsTypes.js';
 import { Shield, ShieldCheck, ShieldAlert, Cpu, Cloud, Zap, Info, Terminal, Database, Activity, Eye, EyeOff } from 'lucide-react';
 
@@ -45,7 +45,6 @@ const DetailRow = ({ label, value, icon: Icon, secondary }: { label: string; val
 
 export const PrivacyDashboard = () => {
 	const settings = useSettingsState();
-	const isOptedOut = useIsOptedOut();
 
 	const features = useMemo(() => {
 		const list: FeatureName[] = ['Chat', 'Gather', 'Agent', 'Autocomplete', 'Review'];
@@ -203,11 +202,11 @@ export const PrivacyDashboard = () => {
 						<DetailRow label="Privacy" value="Stores AI action metadata locally by design" icon={ShieldCheck} />
 					</StatusCard>
 
-					<StatusCard title="Telemetry & Privacy" icon={isOptedOut ? EyeOff : Eye} color={isOptedOut ? 'green' : 'zinc'}>
-						<DetailRow label="Ethereana Telemetry" value="None detected" icon={ShieldCheck} />
+					<StatusCard title="Telemetry & Privacy" icon={ShieldCheck} color="green">
+						<DetailRow label="Etherana Telemetry" value="Disabled" icon={ShieldCheck} />
 						<DetailRow label="Third-party" value="Provider logs apply" />
 						<div className="mt-2 p-2 bg-white/10 rounded text-[10px] leading-relaxed opacity-80">
-							Ethereana-specific AI features do not add telemetry here. Upstream editor, extensions, or providers may have their own behavior. Your AI providers may log requests based on their individual terms of service. Local models such as Ollama or LM Studio keep AI processing on your machine, unless your setup routes requests elsewhere.
+							Etherana-specific AI features have telemetry and analytics removed. Upstream editor components, extensions, or AI providers may have their own behavior. Your AI providers may log requests based on their individual terms of service. Local models keep all processing on your machine.
 						</div>
 					</StatusCard>
 				</div>

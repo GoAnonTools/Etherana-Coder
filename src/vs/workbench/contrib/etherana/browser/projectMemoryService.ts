@@ -12,9 +12,12 @@ import { ETHERANA_PROJECT_MEMORY_STORAGE_KEY } from '../common/storageKeys.js';
 import { ProjectMemoryEntry, ProjectMemoryState, INITIAL_PROJECT_MEMORY_STATE } from '../common/projectMemoryTypes.js';
 import { generateUuid } from '../../../../base/common/uuid.js';
 
+import { IEncryptionService } from '../../../../platform/encryption/common/encryptionService.js';
+
 export interface IProjectMemoryService {
 	readonly _serviceBrand: undefined;
 	readonly state: ProjectMemoryState;
+	readonly whenReady: Promise<void>;
 	onDidChangeState: Event<void>;
 
 	addEntry(entry: Omit<ProjectMemoryEntry, 'id' | 'createdAt' | 'updatedAt' | 'lastUsedAt' | 'enabled'>): string;
@@ -42,22 +45,35 @@ export class ProjectMemoryService extends Disposable implements IProjectMemorySe
 	private readonly _onDidChangeState = this._register(new Emitter<void>());
 	readonly onDidChangeState = this._onDidChangeState.event;
 
+	private _whenReady: Promise<void>;
+	get whenReady() { return this._whenReady; }
+
 	constructor(
 		@IStorageService private readonly storageService: IStorageService,
+		@IEncryptionService private readonly encryptionService: IEncryptionService,
 	) {
 		super();
-		this._loadState();
+		this._whenReady = this._loadState();
 	}
 
 	get state(): ProjectMemoryState {
 		return this._state;
 	}
 
-	private _loadState(): void {
+	private async _loadState(): Promise<void> {
 		const stored = this.storageService.get(ETHERANA_PROJECT_MEMORY_STORAGE_KEY, StorageScope.WORKSPACE);
 		if (stored) {
 			try {
-				this._state = JSON.parse(stored);
+				let decrypted = stored;
+				if (await this.encryptionService.isEncryptionAvailable()) {
+					try {
+						decrypted = await this.encryptionService.decrypt(stored);
+					} catch (e) {
+						// Maybe it was stored unencrypted before? Try to parse as is.
+						console.warn('Decryption failed, attempting to parse as plain text:', e);
+					}
+				}
+				this._state = JSON.parse(decrypted);
 			} catch (e) {
 				console.error('Failed to parse project memory state:', e);
 				this._state = INITIAL_PROJECT_MEMORY_STATE;
@@ -67,11 +83,18 @@ export class ProjectMemoryService extends Disposable implements IProjectMemorySe
 		}
 	}
 
-	private _saveState(): void {
+	private async _saveState(): Promise<void> {
 		this._state.updatedAt = Date.now();
+		const serialized = JSON.stringify(this._state);
+		let toStore = serialized;
+		
+		if (await this.encryptionService.isEncryptionAvailable()) {
+			toStore = await this.encryptionService.encrypt(serialized);
+		}
+
 		this.storageService.store(
 			ETHERANA_PROJECT_MEMORY_STORAGE_KEY,
-			JSON.stringify(this._state),
+			toStore,
 			StorageScope.WORKSPACE,
 			StorageTarget.MACHINE
 		);

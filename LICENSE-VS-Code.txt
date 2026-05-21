@@ -1,5 +1,6 @@
-Void is a fork of VS Code, which is licensed under the MIT License (below).
-Void's additions and modifications are licensed under the Apache 2.0 License (see LICENSE.txt).
+Etherana Coder is a fork of Void Editor, which is licensed under the Apache 2.0 License.
+Void Editor is a fork of VS Code, which is licensed under the MIT License (below).
+Etherana's additions and modifications are licensed under the Apache 2.0 License (see LICENSE.md).
 
 --------------------
 

@@ -20,5 +20,4 @@ export const THREAD_STORAGE_KEY = 'etherana.chatThreadStorageII'
 
 
 
-export const OPT_OUT_KEY = 'etherana.app.optOutAll'
 export const ETHERANA_PROJECT_MEMORY_STORAGE_KEY = 'etherana.projectMemoryStorage'

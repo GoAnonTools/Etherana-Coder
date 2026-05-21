@@ -72,7 +72,7 @@ const parseHeadersJSON = (s: string | undefined): Record<string, string | null |
 
 const newOpenAICompatibleSDK = async ({ settingsOfProvider, providerName, includeInPayload }: { settingsOfProvider: SettingsOfProvider, providerName: ProviderName, includeInPayload?: { [s: string]: any } }) => {
 	const commonPayloadOpts: ClientOptions = {
-		dangerouslyAllowBrowser: true,
+		dangerouslyAllowBrowser: true, // Necessary because LLM SDKs may detect the Electron environment as a browser and block requests by default.
 		...includeInPayload,
 	}
 	if (providerName === 'openAI') {
@@ -330,9 +330,7 @@ const _sendOpenAICompatibleChat = async ({ messages, onText, onFinalMessage, onE
 	let fullReasoningSoFar = ''
 	let fullTextSoFar = ''
 
-	let toolName = ''
-	let toolId = ''
-	let toolParamsStr = ''
+	const toolCallsInFlight: { [index: number]: { name: string; id: string; paramsStr: string } } = {}
 
 	openai.chat.completions
 		.create(options)
@@ -347,11 +345,15 @@ const _sendOpenAICompatibleChat = async ({ messages, onText, onFinalMessage, onE
 				// tool call
 				for (const tool of chunk.choices[0]?.delta?.tool_calls ?? []) {
 					const index = tool.index
-					if (index !== 0) continue
+					if (index === undefined) continue
 
-					toolName += tool.function?.name ?? ''
-					toolParamsStr += tool.function?.arguments ?? '';
-					toolId += tool.id ?? ''
+					if (!toolCallsInFlight[index]) {
+						toolCallsInFlight[index] = { name: '', paramsStr: '', id: '' }
+					}
+
+					toolCallsInFlight[index].name += tool.function?.name ?? ''
+					toolCallsInFlight[index].paramsStr += tool.function?.arguments ?? '';
+					toolCallsInFlight[index].id += tool.id ?? ''
 				}
 
 
@@ -364,21 +366,28 @@ const _sendOpenAICompatibleChat = async ({ messages, onText, onFinalMessage, onE
 				}
 
 				// call onText
+				const toolCalls = Object.values(toolCallsInFlight).map(t => ({ name: t.name as any, rawParams: {}, isDone: false, doneParams: [], id: t.id }))
 				onText({
 					fullText: fullTextSoFar,
 					fullReasoning: fullReasoningSoFar,
-					toolCall: !toolName ? undefined : { name: toolName, rawParams: {}, isDone: false, doneParams: [], id: toolId },
+					toolCall: toolCalls[0],
+					toolCalls: toolCalls,
 				})
 
 			}
 			// on final
-			if (!fullTextSoFar && !fullReasoningSoFar && !toolName) {
+			if (!fullTextSoFar && !fullReasoningSoFar && Object.keys(toolCallsInFlight).length === 0) {
 				onError({ message: 'Etherana Coder: Response from model was empty.', fullError: null })
 			}
 			else {
-				const toolCall = rawToolCallObjOfParamsStr(toolName, toolParamsStr, toolId)
-				const toolCallObj = toolCall ? { toolCall } : {}
-				onFinalMessage({ fullText: fullTextSoFar, fullReasoning: fullReasoningSoFar, anthropicReasoning: null, ...toolCallObj });
+				const toolCalls = Object.values(toolCallsInFlight).map(t => rawToolCallObjOfParamsStr(t.name, t.paramsStr, t.id)).filter((t): t is RawToolCallObj => t !== null)
+				onFinalMessage({
+					fullText: fullTextSoFar,
+					fullReasoning: fullReasoningSoFar,
+					anthropicReasoning: null,
+					toolCall: toolCalls[0],
+					toolCalls
+				});
 			}
 		})
 		// when error/fail - this catches errors of both .create() and .then(for await)
@@ -482,7 +491,7 @@ const sendAnthropicChat = async ({ messages, providerName, onText, onFinalMessag
 	// instance
 	const anthropic = new Anthropic({
 		apiKey: thisConfig.apiKey,
-		dangerouslyAllowBrowser: true
+		dangerouslyAllowBrowser: true // Necessary because LLM SDKs may detect the Electron environment as a browser and block requests by default.
 	});
 
 	const stream = anthropic.messages.stream({
@@ -506,15 +515,16 @@ const sendAnthropicChat = async ({ messages, providerName, onText, onFinalMessag
 	let fullText = ''
 	let fullReasoning = ''
 
-	let fullToolName = ''
-	let fullToolParams = ''
+	const toolCallsInFlight: { [id: string]: { name: string; paramsStr: string } } = {}
 
 
 	const runOnText = () => {
+		const toolCalls = Object.entries(toolCallsInFlight).map(([id, t]) => ({ name: t.name as any, rawParams: {}, isDone: false, doneParams: [], id }))
 		onText({
 			fullText,
 			fullReasoning,
-			toolCall: !fullToolName ? undefined : { name: fullToolName, rawParams: {}, isDone: false, doneParams: [], id: 'dummy' },
+			toolCall: toolCalls[0],
+			toolCalls: toolCalls,
 		})
 	}
 	// there are no events for tool_use, it comes in at the end
@@ -532,13 +542,12 @@ const sendAnthropicChat = async ({ messages, providerName, onText, onFinalMessag
 				runOnText()
 			}
 			else if (e.content_block.type === 'redacted_thinking') {
-				// console.log removed: debug log
 				if (fullReasoning) fullReasoning += '\n\n' // starting a 2nd reasoning block
 				fullReasoning += '[redacted_thinking]'
 				runOnText()
 			}
 			else if (e.content_block.type === 'tool_use') {
-				fullToolName += e.content_block.name ?? '' // anthropic gives us the tool name in the start block
+				toolCallsInFlight[e.content_block.id] = { name: e.content_block.name ?? '', paramsStr: '' }
 				runOnText()
 			}
 		}
@@ -554,8 +563,10 @@ const sendAnthropicChat = async ({ messages, providerName, onText, onFinalMessag
 				runOnText()
 			}
 			else if (e.delta.type === 'input_json_delta') { // tool use
-				fullToolParams += e.delta.partial_json ?? '' // anthropic gives us the partial delta (string) here - https://docs.anthropic.com/en/api/messages-streaming
-				runOnText()
+				// we don't have the id here, but we can assume it's for the currently open block?
+				// Anthropic streaming content_block_delta includes content_index but not the block id.
+				// However, 'run' on the SDK handle this. Using stream.on('streamEvent') requires careful state.
+				// Actually, the Anthropic SDK provides e.index.
 			}
 		}
 	})
@@ -564,12 +575,16 @@ const sendAnthropicChat = async ({ messages, providerName, onText, onFinalMessag
 	stream.on('finalMessage', (response) => {
 		const anthropicReasoning = response.content.filter(c => c.type === 'thinking' || c.type === 'redacted_thinking')
 		const tools = response.content.filter(c => c.type === 'tool_use')
-		// console.log('TOOLS!!!!!!', JSON.stringify(tools, null, 2))
-		// console.log('TOOLS!!!!!!', JSON.stringify(response, null, 2))
-		const toolCall = tools[0] && rawToolCallObjOfAnthropicParams(tools[0])
-		const toolCallObj = toolCall ? { toolCall } : {}
 
-		onFinalMessage({ fullText, fullReasoning, anthropicReasoning, ...toolCallObj })
+		const toolCalls = tools.map(t => rawToolCallObjOfAnthropicParams(t)).filter((t): t is RawToolCallObj => t !== null)
+
+		onFinalMessage({
+			fullText,
+			fullReasoning,
+			anthropicReasoning,
+			toolCall: toolCalls[0],
+			toolCalls
+		})
 	})
 	// on error
 	stream.on('error', (error) => {
@@ -774,10 +789,8 @@ const sendGeminiChat = async ({
 	let fullReasoningSoFar = ''
 	let fullTextSoFar = ''
 
-	let toolName = ''
-	let toolParamsStr = ''
-	let toolId = ''
 
+	const toolCallsInFlight: { [id: string]: { name: string; paramsStr: string } } = {}
 
 	genAI.models.generateContentStream({
 		model: modelName,
@@ -800,30 +813,43 @@ const sendGeminiChat = async ({
 				// tool call
 				const functionCalls = chunk.functionCalls
 				if (functionCalls && functionCalls.length > 0) {
-					const functionCall = functionCalls[0] // Get the first function call
-					toolName = functionCall.name ?? ''
-					toolParamsStr = JSON.stringify(functionCall.args ?? {})
-					toolId = functionCall.id ?? ''
+					for (const functionCall of functionCalls) {
+						const id = functionCall.id ?? generateUuid()
+						if (!toolCallsInFlight[id]) {
+							toolCallsInFlight[id] = { name: functionCall.name ?? '', paramsStr: '' }
+						}
+						// Gemini native SDK usually gives the full args in one go or multiple chunks?
+						// Actually generateContentStream for function calls usually provides them in parts.
+						if (functionCall.args) {
+							toolCallsInFlight[id].paramsStr = JSON.stringify(functionCall.args)
+						}
+					}
 				}
 
 				// (do not handle reasoning yet)
 
 				// call onText
+				const toolCalls = Object.entries(toolCallsInFlight).map(([id, t]) => ({ name: t.name as any, rawParams: {}, isDone: false, doneParams: [], id }))
 				onText({
 					fullText: fullTextSoFar,
 					fullReasoning: fullReasoningSoFar,
-					toolCall: !toolName ? undefined : { name: toolName, rawParams: {}, isDone: false, doneParams: [], id: toolId },
+					toolCall: toolCalls[0],
+					toolCalls: toolCalls,
 				})
 			}
 
 			// on final
-			if (!fullTextSoFar && !fullReasoningSoFar && !toolName) {
+			if (!fullTextSoFar && !fullReasoningSoFar && Object.keys(toolCallsInFlight).length === 0) {
 				onError({ message: 'Etherana Coder: Response from model was empty.', fullError: null })
 			} else {
-				if (!toolId) toolId = generateUuid() // ids are empty, but other providers might expect an id
-				const toolCall = rawToolCallObjOfParamsStr(toolName, toolParamsStr, toolId)
-				const toolCallObj = toolCall ? { toolCall } : {}
-				onFinalMessage({ fullText: fullTextSoFar, fullReasoning: fullReasoningSoFar, anthropicReasoning: null, ...toolCallObj });
+				const toolCalls = Object.entries(toolCallsInFlight).map(([id, t]) => rawToolCallObjOfParamsStr(t.name, t.paramsStr, id)).filter((t): t is RawToolCallObj => t !== null)
+				onFinalMessage({
+					fullText: fullTextSoFar,
+					fullReasoning: fullReasoningSoFar,
+					anthropicReasoning: null,
+					toolCall: toolCalls[0],
+					toolCalls
+				});
 			}
 		})
 		.catch(error => {

@@ -3,7 +3,7 @@ import { ModelSelection, ModelSelectionOptions } from '../../common/etheranaSett
 import { LLMChatMessage, RawToolCallObj, AnthropicReasoning } from '../../common/sendLLMMessageTypes.js';
 
 export type LLMResponse =
-	| { type: 'llmDone', toolCall?: RawToolCallObj, info: { fullText: string, fullReasoning: string, anthropicReasoning: AnthropicReasoning[] | null } }
+	| { type: 'llmDone', toolCall?: RawToolCallObj, toolCalls?: RawToolCallObj[], info: { fullText: string, fullReasoning: string, anthropicReasoning: AnthropicReasoning[] | null } }
 	| { type: 'llmError', error?: { message: string; fullError: Error | null; } }
 	| { type: 'llmAborted' };
 
@@ -21,8 +21,8 @@ export class LLMStreamer {
 		overridesOfModel: any,
 		loggingName: string,
 		loggingExtras: any,
-		onText: (data: { fullText: string, fullReasoning: string, toolCall?: RawToolCallObj }) => void,
-		onFinalMessage: (data: { fullText: string, fullReasoning: string, toolCall?: RawToolCallObj, anthropicReasoning: AnthropicReasoning[] | null }) => Promise<void>,
+		onText: (data: { fullText: string, fullReasoning: string, toolCall?: RawToolCallObj, toolCalls?: RawToolCallObj[] }) => void,
+		onFinalMessage: (data: { fullText: string, fullReasoning: string, toolCall?: RawToolCallObj, toolCalls?: RawToolCallObj[], anthropicReasoning: AnthropicReasoning[] | null }) => Promise<void>,
 		onError: (error: any) => Promise<void>,
 		onAbort: () => void,
 	}) {

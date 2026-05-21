@@ -33,11 +33,6 @@ Etherana Coder is an open-source, AI-integrated IDE built for developers who wan
 
 Download the latest release from the [Releases](../../releases) page, open it, and follow the onboarding steps to configure your preferred AI provider.
 
-## Telemetry
-
-Etherana collects basic anonymous usage analytics (via PostHog) to help us understand how the product is being used — things like which providers are configured, agent loop completions, and whether the app is running. **No code, prompts, or AI responses are ever collected.**
-
-You can opt out at any time in **Settings → Etherana → Disable Telemetry**.
 
 ## Building from Source
 
@@ -60,6 +55,17 @@ Etherana Coder is a fork of [Void Editor](https://github.com/voideditor/void), w
 5. Press `Cmd+R` / `Ctrl+R` inside the dev window to reload after making changes.
 
 > Make sure you're on Node `20.18.2` (see `.nvmrc`). Use [nvm](https://github.com/nvm-sh/nvm) to switch: `nvm install && nvm use`.
+
+## Privacy & Telemetry
+
+Etherana Coder follows a privacy-first approach. 
+
+- **Direct LLM Communication:** Your messages and code context go directly from your machine to your chosen AI provider. No intermediate servers are used.
+- **No Third-Party Analytics:** We have removed third-party tracking services (such as PostHog) from the editor.
+- **Telemetry Opt-Out:** While we have disabled most telemetry by default, some underlying VS Code telemetry may still be active. You can completely opt-out by:
+  1. Opening **Settings** (`Cmd+,` or `Ctrl+,`).
+  2. Searching for `telemetry`.
+  3. Setting `Telemetry: Telemetry Level` to `off`.
 
 For a guide to the codebase, see [ETHERANA_CODEBASE_GUIDE.md](./ETHERANA_CODEBASE_GUIDE.md).
 

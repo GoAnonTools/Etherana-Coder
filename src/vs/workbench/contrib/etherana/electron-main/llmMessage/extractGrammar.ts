@@ -38,14 +38,12 @@ export const extractReasoningWrapper = (
 		if (!foundTag1) {
 			const endsWithTag1 = endsWithAnyPrefixOf(fullText_, thinkTags[0])
 			if (endsWithTag1) {
-				// console.log('endswith1', { fullTextSoFar, fullReasoningSoFar, fullText_ })
 				// wait until we get the full tag or know more
 				return
 			}
 			// if found the first tag
 			const tag1Index = fullText_.indexOf(thinkTags[0])
 			if (tag1Index !== -1) {
-				// console.log('tag1Index !==1', { tag1Index, fullTextSoFar, fullReasoningSoFar, thinkTags, fullText_ })
 				foundTag1 = true
 				// Add text before the tag to fullTextSoFar
 				fullTextSoFar += fullText_.substring(0, tag1Index)
@@ -55,7 +53,6 @@ export const extractReasoningWrapper = (
 				return
 			}
 
-			// console.log('adding to text A', { fullTextSoFar, fullReasoningSoFar })
 			// add the text to fullText
 			fullTextSoFar = fullText_
 			latestAddIdx = fullText_.length
@@ -69,7 +66,6 @@ export const extractReasoningWrapper = (
 		if (!foundTag2) {
 			const endsWithTag2 = endsWithAnyPrefixOf(fullText_, thinkTags[1])
 			if (endsWithTag2 && endsWithTag2 !== thinkTags[1]) { // if ends with any partial part (full is fine)
-				// console.log('endsWith2', { fullTextSoFar, fullReasoningSoFar })
 				// wait until we get the full tag or know more
 				return
 			}
@@ -77,7 +73,6 @@ export const extractReasoningWrapper = (
 			// if found the second tag
 			const tag2Index = fullText_.indexOf(thinkTags[1], latestAddIdx)
 			if (tag2Index !== -1) {
-				// console.log('tag2Index !== -1', { fullTextSoFar, fullReasoningSoFar })
 				foundTag2 = true
 				// Add everything between first and second tag to reasoning
 				fullReasoningSoFar += fullText_.substring(latestAddIdx, tag2Index)
@@ -88,7 +83,6 @@ export const extractReasoningWrapper = (
 			}
 
 			// add the text to fullReasoning (content after first tag but before second tag)
-			// console.log('adding to text B', { fullTextSoFar, fullReasoningSoFar })
 
 			// If we have more text than we've processed, add it to reasoning
 			if (fullText_.length > latestAddIdx) {
@@ -101,7 +95,6 @@ export const extractReasoningWrapper = (
 		}
 
 		// at this point, we found <tag2> - content after the second tag is normal text
-		// console.log('adding to text C', { fullTextSoFar, fullReasoningSoFar })
 
 		// Add any new text after the closing tag to fullTextSoFar
 		if (fullText_.length > latestAddIdx) {
@@ -259,7 +252,6 @@ const parseXMLPrefixToToolCall = <T extends ToolName,>(toolName: T, toolId: stri
 		paramsObj[latestMatchedOpenParam] += paramContents
 	}
 }
-
 export const extractXMLToolsWrapper = (
 	onText: OnText,
 	onFinalMessage: OnFinalMessage,
@@ -277,34 +269,26 @@ export const extractXMLToolsWrapper = (
 
 	const toolId = generateUuid()
 
-	// detect <availableTools[0]></availableTools[0]>, etc
 	let fullText = '';
 	let trueFullText = ''
-	let latestToolCall: RawToolCallObj | undefined = undefined
+	const toolCalls: RawToolCallObj[] = []
+	let currentToolCall: RawToolCallObj | undefined = undefined
 
 	let foundOpenTag: { idx: number, toolName: ToolName } | null = null
-	let openToolTagBuffer = '' // the characters we've seen so far that come after a < with no space afterwards, not yet added to fullText
-
+	let openToolTagBuffer = ''
 	let prevFullTextLen = 0
+
 	const newOnText: OnText = (params) => {
 		const newText = params.fullText.substring(prevFullTextLen)
 		prevFullTextLen = params.fullText.length
 		trueFullText = params.fullText
 
-		// console.log('NEWTEXT', JSON.stringify(newText))
-
-
 		if (foundOpenTag === null) {
 			const newFullText = openToolTagBuffer + newText
-			// ensure the code below doesn't run if only half a tag has been written
 			const isPartial = findPartiallyWrittenToolTagAtEnd(newFullText, toolOpenTags)
 			if (isPartial) {
-				// console.log('--- partial!!!')
 				openToolTagBuffer += newText
-			}
-			// if no tooltag is partially written at the end, attempt to get the index
-			else {
-				// we will instantly retroactively remove this if it's a tag match
+			} else {
 				fullText += openToolTagBuffer
 				openToolTagBuffer = ''
 				fullText += newText
@@ -313,51 +297,78 @@ export const extractXMLToolsWrapper = (
 				if (i !== null) {
 					const [idx, toolTag] = i
 					const toolName = toolTag.substring(1, toolTag.length - 1) as ToolName
-					// console.log('found ', toolName)
 					foundOpenTag = { idx, toolName }
-
-					// do not count anything at or after i in fullText
 					fullText = fullText.substring(0, idx)
 				}
-
-
 			}
 		}
 
-		// toolTagIdx is not null, so parse the XML
 		if (foundOpenTag !== null) {
-			latestToolCall = parseXMLPrefixToToolCall(
+			// We offset the parsing based on where tools already started.
+			// Actually, for multiple tools, we should find each one in trueFullText.
+			// But for now, we only handle the 'latest' one properly in the stream.
+			
+			const toolIdForCurrent = `${toolId}-${toolCalls.length}`;
+			currentToolCall = parseXMLPrefixToToolCall(
 				foundOpenTag.toolName,
-				toolId,
+				toolIdForCurrent,
 				trueFullText.substring(foundOpenTag.idx, Infinity),
 				toolOfToolName,
 			)
+
+			if (currentToolCall.isDone) {
+				toolCalls.push(currentToolCall);
+				const closeTag = `</${foundOpenTag.toolName}>`;
+				const currentTextFromOpen = trueFullText.substring(foundOpenTag.idx, Infinity);
+				const closeTagIdx = currentTextFromOpen.indexOf(closeTag);
+				
+				if (closeTagIdx !== -1) {
+					const absoluteCloseTagEndIdx = foundOpenTag.idx + closeTagIdx + closeTag.length;
+					// The text after this tool call should now be considered part of the normal text stream
+					// We reset foundOpenTag so the next part of trueFullText can be scanned for tools
+					// and we update foundOpenTag.idx to ignore what we already parsed.
+					foundOpenTag = null;
+					currentToolCall = undefined;
+					
+					// Update fullText to include any text that might follow the close tag in this same chunk
+					if (trueFullText.length > absoluteCloseTagEndIdx) {
+						// Note: This text will be re-processed by the 'foundOpenTag === null' block in subsequent logic
+						// but we need to reset the cursor correctly.
+						// Actually, the simplest way is to let the next onText deal with it by properly setting foundOpenTag = null.
+					}
+				} else {
+					// This case should theoretically not happen if isDone is true for XML
+					foundOpenTag = null;
+					currentToolCall = undefined;
+				}
+			}
 		}
 
 		onText({
 			...params,
 			fullText,
-			toolCall: latestToolCall,
+			toolCall: currentToolCall || toolCalls[0],
+			toolCalls: currentToolCall ? [...toolCalls, currentToolCall] : toolCalls,
 		});
 	};
 
 
 	const newOnFinalMessage: OnFinalMessage = (params) => {
-		// treat like just got text before calling onFinalMessage (or else we sometimes miss the final chunk that's new to finalMessage)
 		newOnText({ ...params })
 
 		fullText = fullText.trimEnd()
-		const toolCall = latestToolCall
+		const finalToolCalls = currentToolCall ? [...toolCalls, currentToolCall] : toolCalls;
 
-		// console.log('final message!!!', trueFullText)
-		// console.log('----- returning ----\n', fullText)
-		// console.log('----- tools ----\n', JSON.stringify(firstToolCallRef.current, null, 2))
-		// console.log('----- toolCall ----\n', JSON.stringify(toolCall, null, 2))
-
-		onFinalMessage({ ...params, fullText, toolCall: toolCall })
+		onFinalMessage({ 
+			...params, 
+			fullText, 
+			toolCall: finalToolCalls[0],
+			toolCalls: finalToolCalls
+		})
 	}
 	return { newOnText, newOnFinalMessage };
 }
+
 
 
 

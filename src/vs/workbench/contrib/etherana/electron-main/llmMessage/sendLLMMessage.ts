@@ -100,35 +100,69 @@ export const sendLLMMessage = async ({
 		captureLLMEvent(`${loggingName} - Sending FIM`, { prefixLen: messages_?.prefix?.length, suffixLen: messages_?.suffix?.length })
 
 
-	try {
-		const implementation = sendLLMMessageToProviderImplementation[providerName]
-		if (!implementation) {
-			onError({ message: `Error: Provider "${providerName}" not recognized.`, fullError: null })
-			return
-		}
-		const { sendFIM, sendChat } = implementation
-		if (messagesType === 'chatMessages') {
-			await sendChat({ messages: messages_, onText, onFinalMessage, onError, settingsOfProvider, modelSelectionOptions, overridesOfModel, modelName, _setAborter, providerName, separateSystemMessage, safetyMode, mcpTools })
-			return
-		}
-		if (messagesType === 'FIMMessage') {
-			if (sendFIM) {
-				await sendFIM({ messages: messages_, onText, onFinalMessage, onError, settingsOfProvider, modelSelectionOptions, overridesOfModel, modelName, _setAborter, providerName, separateSystemMessage })
+	const isRetryableError = (errorMessage: string) => {
+		const nonRetryable = [
+			'Invalid',
+			'API key',
+			'not recognized',
+			'not support',
+			'Empty response',
+		];
+		return !nonRetryable.some(s => errorMessage.toLowerCase().includes(s.toLowerCase()));
+	};
+
+	const MAX_RETRIES = 2; // 3 total attempts
+	let attempts = 0;
+
+	const executeWithRetry = async () => {
+		try {
+			const implementation = sendLLMMessageToProviderImplementation[providerName]
+			if (!implementation) {
+				onError({ message: `Error: Provider "${providerName}" not recognized.`, fullError: null })
 				return
 			}
-			onError({ message: `Error running Autocomplete with ${providerName} - ${modelName}.`, fullError: null })
-			return
-		}
-		onError({ message: `Error: Message type "${messagesType}" not recognized.`, fullError: null })
-		return
-	}
+			const { sendFIM, sendChat } = implementation
 
-	catch (error) {
-		if (error instanceof Error) { onError({ message: error + '', fullError: error }) }
-		else { onError({ message: `Unexpected Error in sendLLMMessage: ${error}`, fullError: error }); }
-		// ; (_aborter as any)?.()
-		// _didAbort = true
-	}
+			const retryOnError: OnError = (errorParams) => {
+				if (attempts < MAX_RETRIES && isRetryableError(errorParams.message)) {
+					attempts++;
+					const delay = 1000 * Math.pow(2, attempts - 1);
+					console.log(`Retrying LLM call (attempt ${attempts + 1}) in ${delay}ms due to: ${errorParams.message}`);
+					setTimeout(executeWithRetry, delay);
+				} else {
+					onError(errorParams);
+				}
+			};
+
+			if (messagesType === 'chatMessages') {
+				await sendChat({ messages: messages_, onText, onFinalMessage, onError: retryOnError, settingsOfProvider, modelSelectionOptions, overridesOfModel, modelName, _setAborter, providerName, separateSystemMessage, safetyMode, mcpTools })
+				return
+			}
+			if (messagesType === 'FIMMessage') {
+				if (sendFIM) {
+					await sendFIM({ messages: messages_, onText, onFinalMessage, onError: retryOnError, settingsOfProvider, modelSelectionOptions, overridesOfModel, modelName, _setAborter, providerName, separateSystemMessage })
+					return
+				}
+				onError({ message: `Error running Autocomplete with ${providerName} - ${modelName}.`, fullError: null })
+				return
+			}
+			onError({ message: `Error: Message type "${messagesType}" not recognized.`, fullError: null })
+		}
+		catch (error) {
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			if (attempts < MAX_RETRIES && isRetryableError(errorMessage)) {
+				attempts++;
+				const delay = 1000 * Math.pow(2, attempts - 1);
+				console.log(`Retrying LLM call (attempt ${attempts + 1}) in ${delay}ms due to catch: ${errorMessage}`);
+				setTimeout(executeWithRetry, delay);
+			} else {
+				if (error instanceof Error) { onError({ message: error + '', fullError: error }) }
+				else { onError({ message: `Unexpected Error in sendLLMMessage: ${error}`, fullError: error }); }
+			}
+		}
+	};
+
+	await executeWithRetry();
 
 
 

@@ -782,7 +782,7 @@ ${summaryData}`;
 				nAttempts += 1
 
 				type ResTypes =
-					| { type: 'llmDone', toolCall?: RawToolCallObj, info: { fullText: string, fullReasoning: string, anthropicReasoning: AnthropicReasoning[] | null } }
+					| { type: 'llmDone', toolCall?: RawToolCallObj, toolCalls?: RawToolCallObj[], info: { fullText: string, fullReasoning: string, anthropicReasoning: AnthropicReasoning[] | null } }
 					| { type: 'llmError', error?: { message: string; fullError: Error | null; } }
 					| { type: 'llmAborted' }
 
@@ -829,8 +829,8 @@ ${summaryData}`;
 					overridesOfModel,
 					loggingName: `Chat - ${safetyMode}`,
 					loggingExtras: { threadId, nMessagesSent, safetyMode },
-					onText: ({ fullText, fullReasoning, toolCall }) => {
-						this._setStreamState(threadId, { isRunning: 'LLM', llmInfo: { displayContentSoFar: fullText, reasoningSoFar: fullReasoning, toolCallSoFar: toolCall ?? null }, interrupt: Promise.resolve(() => { if (llmCancelToken) this._llmMessageService.abort(llmCancelToken) }) })
+					onText: ({ fullText, fullReasoning, toolCall, toolCalls }) => {
+						this._setStreamState(threadId, { isRunning: 'LLM', llmInfo: { displayContentSoFar: fullText, reasoningSoFar: fullReasoning, toolCallSoFar: toolCall ?? null, toolCallsSoFar: toolCalls }, interrupt: Promise.resolve(() => { if (llmCancelToken) this._llmMessageService.abort(llmCancelToken) }) })
 					},
 					onFinalMessage: async ({ fullText, fullReasoning, toolCall, anthropicReasoning, }) => {
 						this._flightRecorderService.recordEvent({
@@ -842,7 +842,7 @@ ${summaryData}`;
 							status: 'success',
 							safetyMode
 						});
-						resMessageIsDonePromise({ type: 'llmDone', toolCall, info: { fullText, fullReasoning, anthropicReasoning } }) // resolve with tool calls
+						resMessageIsDonePromise({ type: 'llmDone', toolCall, toolCalls, info: { fullText, fullReasoning, anthropicReasoning } }) // resolve with tool calls
 					},
 					onError: async (error) => {
 						const errorMessage = getErrorMessage(error);
@@ -870,7 +870,7 @@ ${summaryData}`;
 					break
 				}
 
-				this._setStreamState(threadId, { isRunning: 'LLM', llmInfo: { displayContentSoFar: '', reasoningSoFar: '', toolCallSoFar: null }, interrupt: Promise.resolve(() => this._llmMessageService.abort(llmCancelToken)) })
+				this._setStreamState(threadId, { isRunning: 'LLM', llmInfo: { displayContentSoFar: '', reasoningSoFar: '', toolCallSoFar: null, toolCallsSoFar: [] }, interrupt: Promise.resolve(() => this._llmMessageService.abort(llmCancelToken)) })
 				const llmRes = await messageIsDonePromise // wait for message to complete
 
 				// if something else started running in the meantime
@@ -912,58 +912,65 @@ ${summaryData}`;
 				}
 
 				// llm res success
-				const { toolCall, info } = llmRes
+				const { toolCall: toolCall_, toolCalls, info } = llmRes
 
 				this._addMessageToThread(threadId, { role: 'assistant', displayContent: info.fullText, reasoning: info.fullReasoning, anthropicReasoning: info.anthropicReasoning })
 
-				this._setStreamState(threadId, { isRunning: 'idle', interrupt: 'not_needed' }) // just decorative for clarity
+				this._setStreamState(threadId, { isRunning: 'idle', interrupt: 'not_needed' })
 
-				// call tool if there is one
-				if (toolCall) {
-					// Plan analysis
-					if (this._toolOrchestrator.analyzeRisk(toolCall.name as any, toolCall.rawParams).risk !== 'low') {
-						const thread = this.state.allThreads[threadId];
-						if (thread) {
-							const lastPlan = findLast(thread.messages, m => m.role === 'plan') as PlanEntry | undefined;
-							
-							// If no plan exists for this turn, or the turn just started
-							if (!lastPlan || thread.state.autoApprovePlanId !== lastPlan.id) {
-								const { risk, details: riskDetails } = this._toolOrchestrator.analyzeRisk(toolCall.name, toolCall.rawParams);
-								const plan: PlanEntry = {
-									role: 'plan',
-									id: generateUuid(),
-									risk,
-									summary: toolCall.rawParams.explanation || `Modify ${toolCall.name.replace('_', ' ')}`,
-									filesToEdit: toolCall.name.includes('file') && toolCall.rawParams.uri ? [
-										typeof toolCall.rawParams.uri === 'string' ? toolCall.rawParams.uri : 
-										(toolCall.rawParams.uri as any).path || (toolCall.rawParams.uri as any).fsPath || String(toolCall.rawParams.uri)
-									] : [],
-									filesToNotTouch: [],
-									commandsToRun: toolCall.name.includes('command') && toolCall.rawParams.command ? [toolCall.rawParams.command as string] : [],
-									riskDetails,
-									isApproved: false,
-									checkpointAvailable: true,
-									modelName: modelSelection?.modelName || 'default',
-									memoryIncluded: {
-										project: !!projectMemoryContext,
-										terminal: !!terminalContext
-									}
-								};
-								this._addMessageToThread(threadId, plan);
+				const toolsToRun = toolCalls || (toolCall_ ? [toolCall_] : [])
+				if (toolsToRun.length > 0) {
+					for (const toolCall of toolsToRun) {
+						// Plan analysis
+						if (this._toolOrchestrator.analyzeRisk(toolCall.name as any, toolCall.rawParams).risk !== 'low') {
+							const thread = this.state.allThreads[threadId];
+							if (thread) {
+								const lastPlan = findLast(thread.messages, m => m.role === 'plan') as PlanEntry | undefined;
+
+								// If no plan exists for this turn, or the turn just started
+								if (!lastPlan || thread.state.autoApprovePlanId !== lastPlan.id) {
+									const { risk, details: riskDetails } = this._toolOrchestrator.analyzeRisk(toolCall.name, toolCall.rawParams);
+									const plan: PlanEntry = {
+										role: 'plan',
+										id: generateUuid(),
+										risk,
+										summary: toolCall.rawParams.explanation || `Modify ${toolCall.name.replace('_', ' ')}`,
+										filesToEdit: toolCall.name.includes('file') && toolCall.rawParams.uri ? [
+											typeof toolCall.rawParams.uri === 'string' ? toolCall.rawParams.uri :
+												(toolCall.rawParams.uri as any).path || (toolCall.rawParams.uri as any).fsPath || String(toolCall.rawParams.uri)
+										] : [],
+										filesToNotTouch: [],
+										commandsToRun: toolCall.name.includes('command') && toolCall.rawParams.command ? [toolCall.rawParams.command as string] : [],
+										riskDetails,
+										isApproved: false,
+										checkpointAvailable: true,
+										modelName: modelSelection?.modelName || 'default',
+										memoryIncluded: {
+											project: !!projectMemoryContext,
+											terminal: !!terminalContext
+										}
+									};
+									this._addMessageToThread(threadId, plan);
+								}
 							}
 						}
-					}
 
-					const mcpTools = this._mcpService.getMCPTools()
-					const mcpTool = mcpTools?.find(t => t.name === toolCall.name)
+						const mcpTools = this._mcpService.getMCPTools()
+						const mcpTool = mcpTools?.find(t => t.name === toolCall.name)
 
-					const { awaitingUserApproval, interrupted } = await this._runToolCall(threadId, toolCall.name, toolCall.id, mcpTool?.mcpServerName, { preapproved: false, unvalidatedToolParams: toolCall.rawParams })
-					if (interrupted) {
-						this._setStreamState(threadId, undefined)
-						return
+						const { awaitingUserApproval, interrupted } = await this._runToolCall(threadId, toolCall.name, toolCall.id, mcpTool?.mcpServerName, { preapproved: false, unvalidatedToolParams: toolCall.rawParams })
+						if (interrupted) {
+							this._setStreamState(threadId, undefined)
+							return
+						}
+						if (awaitingUserApproval) {
+							isRunningWhenEnd = 'awaiting_user';
+							break; // stop processing tools until approval
+						}
+						else {
+							shouldSendAnotherMessage = true;
+						}
 					}
-					if (awaitingUserApproval) { isRunningWhenEnd = 'awaiting_user' }
-					else { shouldSendAnotherMessage = true }
 
 					this._setStreamState(threadId, { isRunning: 'idle', interrupt: 'not_needed' }) // just decorative, for clarity
 				}

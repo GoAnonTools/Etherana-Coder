@@ -178,6 +178,7 @@ export type ThreadStreamState = {
 			displayContentSoFar: string;
 			reasoningSoFar: string;
 			toolCallSoFar: RawToolCallObj | null;
+			toolCallsSoFar?: RawToolCallObj[];
 		};
 		toolInfo?: undefined;
 		interrupt: Promise<() => void>;
