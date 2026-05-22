@@ -7,8 +7,8 @@
 	"dataFolderName": ".etherana-coder",
 	"win32MutexName": "etherana-coder",
 	"licenseName": "Apache-2.0",
-	"licenseUrl": "https://github.com/etherana/etherana/blob/main/LICENSE.md",
-	"serverLicenseUrl": "https://github.com/etherana/etherana/blob/main/LICENSE.md",
+	"licenseUrl": "https://github.com/GoAnonTools/Etherana-Coder/blob/main/LICENSE.txt",
+	"serverLicenseUrl": "https://github.com/GoAnonTools/Etherana-Coder/blob/main/LICENSE.txt",
 	"serverGreeting": [],
 	"serverLicense": [],
 	"serverLicensePrompt": "",
@@ -29,7 +29,7 @@
 	"darwinBundleIdentifier": "com.etherana.code",
 	"linuxIconName": "etherana-coder",
 	"licenseFileName": "LICENSE.md",
-	"reportIssueUrl": "https://github.com/etherana/etherana/issues/new",
+	"reportIssueUrl": "https://github.com/GoAnonTools/Etherana-Coder/issues/new",
 	"nodejsRepository": "https://nodejs.org",
 	"urlProtocol": "etherana",
 	"extensionsGallery": {
@@ -38,9 +38,7 @@
 	},
 	"builtInExtensions": [],
 	"linkProtectionTrustedDomains": [
-		"https://etherana.com",
-		"https://etherana.dev",
-		"https://github.com/etherana/etherana-coder",
+		"https://github.com/GoAnonTools/Etherana-Coder",
 		"https://ollama.com"
 	]
 }

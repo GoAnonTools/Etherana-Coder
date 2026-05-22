@@ -3,6 +3,11 @@
  *  Licensed under the Apache License, Version 2.0. See LICENSE.txt for more information.
  *--------------------------------------------------------------------------------------*/
 
+/*--------------------------------------------------------------------------------------
+ *  © 2026 GoAnon. All rights reserved.
+ *  Licensed under the Apache License, Version 2.0. See LICENSE.txt for more information.
+ *--------------------------------------------------------------------------------------*/
+
 import { IToolsService } from '../toolsService.js';
 import { IMCPService } from '../../common/mcpService.js';
 import { ToolName, ToolCallParams, approvalTypeOfBuiltinToolName } from '../../common/toolsServiceTypes.js';
@@ -20,15 +25,34 @@ export class ToolOrchestrator {
 		}
 		if (toolName === 'run_command' || toolName === 'run_persistent_command') {
 			const cmd = (params.command || '').toLowerCase();
-			const dangerousPatterns = [
-				'push', 'deploy', 'rm -rf', 'publish', 'git reset', 'git clean',
-				'sudo', 'chmod', 'chown', 'docker', 'kubectl', 'terraform',
-				'vercel', 'netlify', 'flyctl', 'npm publish', 'pnpm publish', 'yarn publish'
-			];
-			if (dangerousPatterns.some(p => cmd.includes(p))) {
-				return { risk: 'high', details: 'Potentially destructive or external command detected.' };
+
+			// Obfuscation / shell substitution — flag regardless of apparent content
+			if (/base64\s*--?d|eval\s*[\(\$]|\$\(|\`[^\`]+\`/.test(cmd)) {
+				return { risk: 'high', details: 'Command contains shell substitution or obfuscation patterns.' };
 			}
-			if (cmd.includes('install') || cmd.includes('add') || cmd.includes('update')) {
+
+			// Word-boundary-aware patterns — avoids false positives like "array.push" or "pushNotification"
+			const dangerousPatterns: Array<[RegExp, string]> = [
+				[/\bgit\s+push\b/, 'git push'],
+				[/\bgit\s+reset\b/, 'git reset'],
+				[/\bgit\s+clean\b/, 'git clean'],
+				[/\brm\s+-[a-z]*rf?\b/, 'rm -rf'],
+				[/\bsudo\b/, 'sudo'],
+				[/\bchmod\b/, 'chmod'],
+				[/\bchown\b/, 'chown'],
+				[/\bdeploy\b/, 'deploy command'],
+				[/\bdocker\s+(push|deploy|run)\b/, 'docker push/deploy/run'],
+				[/\bkubectl\b/, 'kubectl'],
+				[/\bterraform\s+(apply|destroy)\b/, 'terraform apply/destroy'],
+				[/\bvercel\b|\bnetlify\b|\bflyctl\b/, 'deployment CLI'],
+				[/\bnpm\s+publish\b|\bpnpm\s+publish\b|\byarn\s+publish\b/, 'package publish'],
+			];
+			const matched = dangerousPatterns.find(([p]) => p.test(cmd));
+			if (matched) {
+				return { risk: 'high', details: `Potentially destructive or external command: ${matched[1]}.` };
+			}
+
+			if (/\b(install|add|update)\b/.test(cmd)) {
 				return { risk: 'medium', details: 'Modifying project dependencies.' };
 			}
 			return { risk: 'medium', details: 'Running a terminal command.' };
@@ -59,7 +83,7 @@ export class ToolOrchestrator {
 
 	public stringifyResult(toolName: ToolName, toolResult: any): string {
 		if (isABuiltinToolName(toolName)) {
-			return this._toolsService.stringOfResult[toolName](null as any, toolResult); // Tool params not always needed for stringification
+			return this._toolsService.stringOfResult[toolName](null as any, toolResult);
 		}
 		return this._mcpService.stringifyResult(toolResult);
 	}

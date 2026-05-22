@@ -21,26 +21,14 @@ import { IAction } from '../../../../base/common/actions.js';
 
 
 const notifyUpdate = (res: EtheranaCheckUpdateRespose & { message: string }, notifService: INotificationService, updateService: IUpdateService): INotificationHandle => {
-	const message = res?.message || 'This is a very old version of Etherana, please download the latest version! [Etherana Editor](https://etherana.com/download-beta)!'
+	const message = res?.message || 'This is a very old version of Etherana, please download the latest version!'
 
 	let actions: INotificationActions | undefined
 
 	if (res?.action) {
 		const primary: IAction[] = []
 
-		if (res.action === 'reinstall') {
-			primary.push({
-				label: `Reinstall`,
-				id: 'etherana.updater.reinstall',
-				enabled: true,
-				tooltip: '',
-				class: undefined,
-				run: () => {
-					const { window } = dom.getActiveWindow()
-					window.open('https://etherana.com/download-beta')
-				}
-			})
-		}
+
 
 		if (res.action === 'download') {
 			primary.push({
@@ -82,17 +70,7 @@ const notifyUpdate = (res: EtheranaCheckUpdateRespose & { message: string }, not
 			})
 		}
 
-		primary.push({
-			id: 'etherana.updater.site',
-			enabled: true,
-			label: `Etherana Site`,
-			tooltip: '',
-			class: undefined,
-			run: () => {
-				const { window } = dom.getActiveWindow()
-				window.open('https://etherana.com/')
-			}
-		})
+
 
 		actions = {
 			primary: primary,
@@ -127,7 +105,7 @@ const notifyUpdate = (res: EtheranaCheckUpdateRespose & { message: string }, not
 	// })
 }
 const notifyErrChecking = (notifService: INotificationService): INotificationHandle => {
-	const message = `Etherana Error: There was an error checking for updates. If this persists, please get in touch or reinstall Etherana [here](https://etherana.com/download-beta)!`
+	const message = `Etherana Error: There was an error checking for updates. If this persists, please get in touch or reinstall Etherana!`
 	const notifController = notifService.notify({
 		severity: Severity.Info,
 		message: message,

@@ -40,8 +40,6 @@ import './terminalToolService.js'
 // register Thread History
 import './chatThreadService.js'
 
-// ping
-import './metricsPollService.js'
 
 // helper services
 import './helperServices/consistentItemService.js'

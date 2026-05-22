@@ -101,7 +101,6 @@ const newOpenAICompatibleSDK = async ({ settingsOfProvider, providerName, includ
 			baseURL: 'https://openrouter.ai/api/v1',
 			apiKey: thisConfig.apiKey,
 			defaultHeaders: {
-				'HTTP-Referer': 'https://etherana.com', // Optional, for including your app on openrouter.ai rankings.
 				'X-Title': 'Etherana', // Optional. Shows in rankings on openrouter.ai.
 			},
 			...commonPayloadOpts,
