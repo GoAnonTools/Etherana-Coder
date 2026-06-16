@@ -39,11 +39,13 @@ export const DOWNLOAD_URL = new RawContextKey<string>('downloadUrl', '');
 let releaseNotesManager: ReleaseNotesManager | undefined = undefined;
 
 export function showReleaseNotesInEditor(instantiationService: IInstantiationService, version: string, useCurrentFile: boolean) {
-	if (!releaseNotesManager) {
-		releaseNotesManager = instantiationService.createInstance(ReleaseNotesManager);
-	}
-
-	return releaseNotesManager.show(version, useCurrentFile);
+	// Etherana Coder is privacy-first: do not fetch online release notes.
+	void instantiationService;
+	void version;
+	void useCurrentFile;
+	void ReleaseNotesManager;
+	void releaseNotesManager;
+	return Promise.resolve(undefined);
 }
 
 async function openLatestReleaseNotesInBrowser(accessor: ServicesAccessor) {

@@ -11,7 +11,7 @@ import * as path from '../../../base/common/path.js';
 import { IEnvironmentMainService } from '../../environment/electron-main/environmentMainService.js';
 import { ILifecycleMainService } from '../../lifecycle/electron-main/lifecycleMainService.js';
 import { ILogService } from '../../log/common/log.js';
-import { AvailableForDownload, IUpdateService, State, StateType, UpdateType } from '../common/update.js';
+import { AvailableForDownload, IUpdateService, State, UpdateType, DisablementReason } from '../common/update.js';
 
 abstract class AbstractUpdateService implements IUpdateService {
 
@@ -58,23 +58,15 @@ abstract class AbstractUpdateService implements IUpdateService {
 	}
 
 	async checkForUpdates(explicit: boolean): Promise<void> {
-		this.logService.trace('update#checkForUpdates, state = ', this.state.type);
-
-		if (this.state.type !== StateType.Idle) {
-			return;
-		}
-
-		this.doCheckForUpdates(explicit);
+		// Etherana Coder is privacy-first: never contact update servers.
+		void explicit;
+		void this.lifecycleMainService;
+		this.setState(State.Disabled(DisablementReason.ManuallyDisabled));
+		return;
 	}
 
 	async downloadUpdate(): Promise<void> {
-		this.logService.trace('update#downloadUpdate, state = ', this.state.type);
-
-		if (this.state.type !== StateType.AvailableForDownload) {
-			return;
-		}
-
-		await this.doDownloadUpdate(this.state);
+		return;
 	}
 
 	protected doDownloadUpdate(state: AvailableForDownload): Promise<void> {
@@ -82,13 +74,7 @@ abstract class AbstractUpdateService implements IUpdateService {
 	}
 
 	async applyUpdate(): Promise<void> {
-		this.logService.trace('update#applyUpdate, state = ', this.state.type);
-
-		if (this.state.type !== StateType.Downloaded) {
-			return;
-		}
-
-		await this.doApplyUpdate();
+		return;
 	}
 
 	protected doApplyUpdate(): Promise<void> {
@@ -96,24 +82,6 @@ abstract class AbstractUpdateService implements IUpdateService {
 	}
 
 	quitAndInstall(): Promise<void> {
-		this.logService.trace('update#quitAndInstall, state = ', this.state.type);
-
-		if (this.state.type !== StateType.Ready) {
-			return Promise.resolve(undefined);
-		}
-
-		this.logService.trace('update#quitAndInstall(): before lifecycle quit()');
-
-		this.lifecycleMainService.quit(true /* will restart */).then(vetod => {
-			this.logService.trace(`update#quitAndInstall(): after lifecycle quit() with veto: ${vetod}`);
-			if (vetod) {
-				return;
-			}
-
-			this.logService.trace('update#quitAndInstall(): running raw#quitAndInstall()');
-			this.doQuitAndInstall();
-		});
-
 		return Promise.resolve(undefined);
 	}
 
