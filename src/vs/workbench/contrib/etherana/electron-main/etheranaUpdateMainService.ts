@@ -6,7 +6,7 @@
 import { Disposable } from '../../../../base/common/lifecycle.js';
 import { IEnvironmentMainService } from '../../../../platform/environment/electron-main/environmentMainService.js';
 import { IProductService } from '../../../../platform/product/common/productService.js';
-import { IUpdateService, StateType } from '../../../../platform/update/common/update.js';
+import { IUpdateService } from '../../../../platform/update/common/update.js';
 import { IEtheranaUpdateService } from '../common/etheranaUpdateService.js';
 import { EtheranaCheckUpdateRespose } from '../common/etheranaUpdateServiceTypes.js';
 
@@ -26,66 +26,19 @@ export class EtheranaMainUpdateService extends Disposable implements IEtheranaUp
 
 	async check(explicit: boolean): Promise<EtheranaCheckUpdateRespose> {
 
-		const isDevMode = !this._envMainService.isBuilt // found in abstractUpdateService.ts
+		const isDevMode = !this._envMainService.isBuilt; // found in abstractUpdateService.ts
+
+		// Etherana Coder privacy-first: do not perform automatic or manual online
+		// update checks from the app. The injected services are retained for API
+		// compatibility with the existing update channel.
+		void this._productService;
+		void this._updateService;
 
 		if (isDevMode) {
-			return { message: null } as const
+			return { message: null } as const;
 		}
 
-		// if disabled and not explicitly checking, return early
-		if (this._updateService.state.type === StateType.Disabled) {
-			if (!explicit)
-				return { message: null } as const
-		}
-
-		this._updateService.checkForUpdates(false) // implicity check, then handle result ourselves
-
-		console.log('updateState', this._updateService.state)
-
-		if (this._updateService.state.type === StateType.Uninitialized) {
-			// The update service hasn't been initialized yet
-			return { message: explicit ? 'Checking for updates soon...' : null, action: explicit ? 'reinstall' : undefined } as const
-		}
-
-		if (this._updateService.state.type === StateType.Idle) {
-			// No updates currently available
-			return { message: explicit ? 'No updates found!' : null, action: explicit ? 'reinstall' : undefined } as const
-		}
-
-		if (this._updateService.state.type === StateType.CheckingForUpdates) {
-			// Currently checking for updates
-			return { message: explicit ? 'Checking for updates...' : null } as const
-		}
-
-		if (this._updateService.state.type === StateType.AvailableForDownload) {
-			// Update available but requires manual download (mainly for Linux)
-			return { message: 'A new update is available!', action: 'download', } as const
-		}
-
-		if (this._updateService.state.type === StateType.Downloading) {
-			// Update is currently being downloaded
-			return { message: explicit ? 'Currently downloading update...' : null } as const
-		}
-
-		if (this._updateService.state.type === StateType.Downloaded) {
-			// Update has been downloaded but not yet ready
-			return { message: explicit ? 'An update is ready to be applied!' : null, action: 'apply' } as const
-		}
-
-		if (this._updateService.state.type === StateType.Updating) {
-			// Update is being applied
-			return { message: explicit ? 'Applying update...' : null } as const
-		}
-
-		if (this._updateService.state.type === StateType.Ready) {
-			// Update is ready
-			return { message: 'Restart Etherana to update!', action: 'restart' } as const
-		}
-
-		if (this._updateService.state.type === StateType.Disabled) {
-			return await this._manualCheckGHTagIfDisabled(explicit)
-		}
-		return null
+		return this._manualCheckGHTagIfDisabled(explicit);
 	}
 
 
@@ -94,58 +47,13 @@ export class EtheranaMainUpdateService extends Disposable implements IEtheranaUp
 
 
 	private async _manualCheckGHTagIfDisabled(explicit: boolean): Promise<EtheranaCheckUpdateRespose> {
-		try {
-			const response = await fetch('https://api.github.com/repos/etherana/binaries/releases/latest');
-
-			const data = await response.json();
-			const version = data.tag_name;
-
-			const myVersion = this._productService.version
-			const latestVersion = version
-
-			const isUpToDate = myVersion === latestVersion // only makes sense if response.ok
-
-			let message: string | null
-			let action: 'reinstall' | undefined
-
-			// explicit
-			if (explicit) {
-				if (response.ok) {
-					if (!isUpToDate) {
-						message = 'A new version of Etherana is available! Please reinstall (auto-updates are disabled on this OS) - it only takes a second!'
-						action = 'reinstall'
-					}
-					else {
-						message = 'Etherana is up-to-date!'
-					}
-				}
-				else {
-					message = `An error occurred when fetching the latest GitHub release tag. Please try again in ~5 minutes, or reinstall.`
-					action = 'reinstall'
-				}
-			}
-			// not explicit
-			else {
-				if (response.ok && !isUpToDate) {
-					message = 'A new version of Etherana is available! Please reinstall (auto-updates are disabled on this OS) - it only takes a second!'
-					action = 'reinstall'
-				}
-				else {
-					message = null
-				}
-			}
-			return { message, action } as const
+		if (!explicit) {
+			return { message: null } as const;
 		}
-		catch (e) {
-			if (explicit) {
-				return {
-					message: `An error occurred when fetching the latest GitHub release tag: ${e}. Please try again in ~5 minutes.`,
-					action: 'reinstall',
-				}
-			}
-			else {
-				return { message: null } as const
-			}
-		}
+
+		return {
+			message: 'Online update checks are disabled in Etherana Coder. Please check the official release page manually if you want to update.',
+			action: 'reinstall',
+		} as const;
 	}
 }
