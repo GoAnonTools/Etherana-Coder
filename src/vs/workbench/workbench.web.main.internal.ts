@@ -160,7 +160,8 @@ import './contrib/tasks/browser/taskService.js';
 import './contrib/tags/browser/workspaceTagsService.js';
 
 // Issues
-import './contrib/issue/browser/issue.contribution.js';
+// Etherana Coder privacy-first: web issue reporter contribution is disabled.
+// import './contrib/issue/browser/issue.contribution.js';
 
 // Splash
 import './contrib/splash/browser/splash.contribution.js';

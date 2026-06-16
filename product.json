@@ -29,7 +29,6 @@
 	"darwinBundleIdentifier": "com.etherana.code",
 	"linuxIconName": "etherana-coder",
 	"licenseFileName": "LICENSE.md",
-	"reportIssueUrl": "https://github.com/GoAnonTools/Etherana-Coder/issues/new",
 	"nodejsRepository": "https://nodejs.org",
 	"urlProtocol": "etherana",
 	"builtInExtensions": [],

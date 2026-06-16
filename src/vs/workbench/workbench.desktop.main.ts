@@ -118,7 +118,8 @@ import './contrib/debug/electron-sandbox/extensionHostDebugService.js';
 import './contrib/extensions/electron-sandbox/extensions.contribution.js';
 
 // Issues
-import './contrib/issue/electron-sandbox/issue.contribution.js';
+// Etherana Coder privacy-first: online issue reporter contribution is disabled.
+// import './contrib/issue/electron-sandbox/issue.contribution.js';
 
 // Process
 import './contrib/issue/electron-sandbox/process.contribution.js';
