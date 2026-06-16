@@ -163,7 +163,8 @@ import './contrib/mergeEditor/electron-sandbox/mergeEditor.contribution.js';
 import './contrib/multiDiffEditor/browser/multiDiffEditor.contribution.js';
 
 // Remote Tunnel
-import './contrib/remoteTunnel/electron-sandbox/remoteTunnel.contribution.js';
+// Etherana Coder privacy-first: Remote Tunnel contribution is disabled.
+// import './contrib/remoteTunnel/electron-sandbox/remoteTunnel.contribution.js';
 
 // Chat
 import './contrib/chat/electron-sandbox/chat.contribution.js';
