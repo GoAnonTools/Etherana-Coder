@@ -93,11 +93,11 @@ export interface URIDescriptor {
  * @returns false - telemetry is completely disabled, true - telemetry is logged locally, but may not be sent
  */
 export function supportsTelemetry(productService: IProductService, environmentService: IEnvironmentService): boolean {
-	// If it's OSS and telemetry isn't disabled via the CLI we will allow it for logging only purposes
-	if (!environmentService.isBuilt && !environmentService.disableTelemetry) {
-		return true;
-	}
-	return !(environmentService.disableTelemetry || !productService.enableTelemetry);
+	// Etherana Coder is privacy-first: product telemetry is disabled at runtime.
+	// Keep the parameters to preserve the upstream function signature.
+	void productService;
+	void environmentService;
+	return false;
 }
 
 /**
@@ -108,24 +108,11 @@ export function supportsTelemetry(productService: IProductService, environmentSe
  * @returns True if telemetry is actually disabled and we're only logging for debug purposes
  */
 export function isLoggingOnly(productService: IProductService, environmentService: IEnvironmentService): boolean {
-	// If we're testing an extension, log telemetry for debug purposes
-	if (environmentService.extensionTestsLocationURI) {
-		return true;
-	}
-	// Logging only mode is only for OSS
-	if (environmentService.isBuilt) {
-		return false;
-	}
-
-	if (environmentService.disableTelemetry) {
-		return false;
-	}
-
-	if (productService.enableTelemetry && productService.aiConfig?.ariaKey) {
-		return false;
-	}
-
-	return true;
+	// Etherana Coder does not keep VS Code telemetry in logging-only mode either.
+	// Keep the parameters to preserve the upstream function signature.
+	void productService;
+	void environmentService;
+	return false;
 }
 
 /**
@@ -145,7 +132,7 @@ export function getTelemetryLevel(configurationService: IConfigurationService): 
 	}
 
 	// Maps new telemetry setting to a telemetry level
-	switch (newConfig ?? TelemetryConfiguration.ON) {
+	switch (newConfig ?? TelemetryConfiguration.OFF) {
 		case TelemetryConfiguration.ON:
 			return TelemetryLevel.USAGE;
 		case TelemetryConfiguration.ERROR:
