@@ -64,7 +64,8 @@ export abstract class AbstractUserDataSyncStoreManagementService extends Disposa
 	}
 
 	protected updateUserDataSyncStore(): void {
-		this._userDataSyncStore = this.toUserDataSyncStore(this.productService[CONFIGURATION_SYNC_STORE_KEY]);
+		// Etherana Coder privacy-first: Settings Sync has no remote store.
+		this._userDataSyncStore = undefined;
 		this._onDidChangeUserDataSyncStore.fire();
 	}
 

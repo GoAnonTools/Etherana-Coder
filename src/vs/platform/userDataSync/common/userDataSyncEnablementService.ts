@@ -32,30 +32,28 @@ export class UserDataSyncEnablementService extends Disposable implements IUserDa
 	}
 
 	isEnabled(): boolean {
-		switch (this.environmentService.sync) {
-			case 'on':
-				return true;
-			case 'off':
-				return false;
-		}
-		return this.storageService.getBoolean(enablementKey, StorageScope.APPLICATION, false);
+		// Etherana Coder is privacy-first: Settings Sync is always disabled.
+		void this.storageService;
+		void this.userDataSyncStoreManagementService;
+		void this.storeResourceEnablement;
+		return false;
 	}
 
 	canToggleEnablement(): boolean {
-		return this.userDataSyncStoreManagementService.userDataSyncStore !== undefined && this.environmentService.sync === undefined;
+		return false;
 	}
 
 	setEnablement(enabled: boolean): void {
-		if (enabled && !this.canToggleEnablement()) {
-			return;
-		}
-		this.storageService.store(enablementKey, enabled, StorageScope.APPLICATION, StorageTarget.MACHINE);
+		// Ignore attempts to enable Settings Sync.
+		void enabled;
+		void this.storageService;
+		return;
 	}
 
-	isResourceEnabled(resource: SyncResource, defaultValue?: boolean): boolean {
-		const storedValue = this.storageService.getBoolean(getEnablementKey(resource), StorageScope.APPLICATION);
-		defaultValue = defaultValue ?? resource !== SyncResource.Prompts;
-		return storedValue ?? defaultValue;
+	isResourceEnabled(resource: SyncResource): boolean {
+		// No sync resource may be enabled.
+		void resource;
+		return false;
 	}
 
 	isResourceEnablementConfigured(resource: SyncResource): boolean {
@@ -65,10 +63,10 @@ export class UserDataSyncEnablementService extends Disposable implements IUserDa
 	}
 
 	setResourceEnablement(resource: SyncResource, enabled: boolean): void {
-		if (this.isResourceEnabled(resource) !== enabled) {
-			const resourceEnablementKey = getEnablementKey(resource);
-			this.storeResourceEnablement(resourceEnablementKey, enabled);
-		}
+		// Ignore attempts to enable individual sync resources.
+		void resource;
+		void enabled;
+		return;
 	}
 
 	getResourceSyncStateVersion(resource: SyncResource): string | undefined {
