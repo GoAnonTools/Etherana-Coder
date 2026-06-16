@@ -7,8 +7,8 @@
 	"dataFolderName": ".etherana-coder",
 	"win32MutexName": "etherana-coder",
 	"licenseName": "Apache-2.0",
-	"licenseUrl": "https://github.com/GoAnonTools/Etherana-Coder/blob/main/LICENSE.txt",
-	"serverLicenseUrl": "https://github.com/GoAnonTools/Etherana-Coder/blob/main/LICENSE.txt",
+	"licenseUrl": "https://github.com/GoAnonTools/Etherana-Coder/blob/main/LICENSE.md",
+	"serverLicenseUrl": "https://github.com/GoAnonTools/Etherana-Coder/blob/main/LICENSE.md",
 	"serverGreeting": [],
 	"serverLicense": [],
 	"serverLicensePrompt": "",
@@ -32,10 +32,6 @@
 	"reportIssueUrl": "https://github.com/GoAnonTools/Etherana-Coder/issues/new",
 	"nodejsRepository": "https://nodejs.org",
 	"urlProtocol": "etherana",
-	"extensionsGallery": {
-		"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
-		"itemUrl": "https://marketplace.visualstudio.com/items"
-	},
 	"builtInExtensions": [],
 	"linkProtectionTrustedDomains": [
 		"https://github.com/GoAnonTools/Etherana-Coder",
