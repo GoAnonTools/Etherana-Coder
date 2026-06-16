@@ -97,7 +97,7 @@ export async function createSlowExtensionAction(
 
 	const requestService = accessor.get(IRequestService);
 	const instaService = accessor.get(IInstantiationService);
-	const url = `https://api.github.com/search/issues?q=is:issue+state:open+in:title+repo:${info.owner}/${info.repo}+%22Extension+causes+high+cpu+load%22`;
+	const url = `about:blank`;
 	let res: IRequestContext;
 	try {
 		res = await requestService.request({ url }, CancellationToken.None);

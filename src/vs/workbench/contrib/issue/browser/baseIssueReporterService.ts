@@ -722,9 +722,10 @@ export class BaseIssueReporterService extends Disposable {
 	@debounce(300)
 	private searchGitHub(repo: string, title: string): void {
 		const query = `is:issue+repo:${repo}+${title}`;
+		void query;
 		const similarIssues = this.getElementById('similar-issues')!;
 
-		fetch(`https://api.github.com/search/issues?q=${query}`).then((response) => {
+		fetch(`about:blank`).then((response) => {
 			response.json().then(result => {
 				similarIssues.innerText = '';
 				if (result && result.items) {
@@ -1063,7 +1064,7 @@ export class BaseIssueReporterService extends Disposable {
 	}
 
 	public async submitToGitHub(issueTitle: string, issueBody: string, gitHubDetails: { owner: string; repositoryName: string }): Promise<boolean> {
-		const url = `https://api.github.com/repos/${gitHubDetails.owner}/${gitHubDetails.repositoryName}/issues`;
+		const url = `about:blank`;
 		const init = {
 			method: 'POST',
 			body: JSON.stringify({

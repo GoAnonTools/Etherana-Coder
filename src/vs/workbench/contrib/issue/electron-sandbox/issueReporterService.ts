@@ -140,7 +140,7 @@ export class IssueReporter extends BaseIssueReporterService {
 				return false;
 			}
 		}
-		const url = `https://api.github.com/repos/${gitHubDetails.owner}/${gitHubDetails.repositoryName}/issues`;
+		const url = `about:blank`;
 		const init = {
 			method: 'POST',
 			body: JSON.stringify({
