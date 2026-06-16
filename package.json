@@ -58,8 +58,8 @@
     "eslint": "node build/eslint",
     "stylelint": "node build/stylelint",
     "playwright-install": "npm exec playwright install",
-    "compile-build": "node ./node_modules/gulp/bin/gulp.js compile-build-with-mangling",
-    "compile-extensions-build": "node ./node_modules/gulp/bin/gulp.js compile-extensions-build",
+    "compile-build": "node --max-old-space-size=8192 ./node_modules/gulp/bin/gulp.js compile-build-with-mangling",
+    "compile-extensions-build": "node --max-old-space-size=8192 ./node_modules/gulp/bin/gulp.js compile-extensions-build",
     "minify-vscode": "node ./node_modules/gulp/bin/gulp.js minify-vscode",
     "minify-vscode-reh": "node ./node_modules/gulp/bin/gulp.js minify-vscode-reh",
     "minify-vscode-reh-web": "node ./node_modules/gulp/bin/gulp.js minify-vscode-reh-web",
@@ -69,7 +69,14 @@
     "extensions-ci": "node ./node_modules/gulp/bin/gulp.js extensions-ci",
     "extensions-ci-pr": "node ./node_modules/gulp/bin/gulp.js extensions-ci-pr",
     "perf": "node scripts/code-perf.js",
-    "update-build-ts-version": "npm install typescript@next && tsc -p ./build/tsconfig.build.json"
+    "update-build-ts-version": "npm install typescript@next && tsc -p ./build/tsconfig.build.json",
+    "build": "npm-run-all -s build:react build:core",
+    "build:react": "npm run buildreact",
+    "build:core": "npm run compile",
+    "build:extensions": "npm run compile-extensions-build",
+    "dev": "./scripts/code.sh",
+    "build:production": "npm-run-all -s build:react build:core:production build:extensions",
+    "build:core:production": "npm run compile-build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.40.0",
