@@ -161,7 +161,7 @@ const bundleVSCodeTask = task.define('bundle-vscode', task.series(
 ));
 gulp.task(bundleVSCodeTask);
 
-const sourceMappingURLBase = `https://main.vscode-cdn.net/sourcemaps/${commit}`;
+const sourceMappingURLBase = '';
 const minifyVSCodeTask = task.define('minify-vscode', task.series(
 	bundleVSCodeTask,
 	util.rimraf('out-vscode-min'),

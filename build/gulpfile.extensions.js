@@ -73,7 +73,7 @@ const compilations = [
 	'.vscode/extensions/vscode-selfhost-import-aid/tsconfig.json',
 ];
 
-const getBaseUrl = out => `https://main.vscode-cdn.net/sourcemaps/${commit}/${out}`;
+const getBaseUrl = out => '';
 
 const tasks = compilations.map(function (tsconfigFile) {
 	const absolutePath = path.join(root, tsconfigFile);

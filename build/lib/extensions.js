@@ -74,7 +74,7 @@ const getVersion_1 = require("./getVersion");
 const fetch_1 = require("./fetch");
 const root = path_1.default.dirname(path_1.default.dirname(__dirname));
 const commit = (0, getVersion_1.getVersion)(root);
-const sourceMappingURLBase = `https://main.vscode-cdn.net/sourcemaps/${commit}`;
+const sourceMappingURLBase = '';
 function minifyExtensionResources(input) {
     const jsonFilter = (0, gulp_filter_1.default)(['**/*.json', '**/*.code-snippets'], { restore: true });
     return input

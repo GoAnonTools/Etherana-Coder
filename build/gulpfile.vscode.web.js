@@ -134,7 +134,7 @@ const bundleVSCodeWebTask = task.define('bundle-vscode-web', task.series(
 const minifyVSCodeWebTask = task.define('minify-vscode-web', task.series(
 	bundleVSCodeWebTask,
 	util.rimraf('out-vscode-web-min'),
-	optimize.minifyTask('out-vscode-web', `https://main.vscode-cdn.net/sourcemaps/${commit}/core`)
+	optimize.minifyTask('out-vscode-web', '')
 ));
 gulp.task(minifyVSCodeWebTask);
 
