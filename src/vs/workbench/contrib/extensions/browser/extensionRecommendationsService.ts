@@ -113,7 +113,10 @@ export class ExtensionRecommendationsService extends Disposable implements IExte
 	}
 
 	private isEnabled(): boolean {
-		return this.galleryService.isEnabled() && !this.environmentService.isExtensionDevelopment;
+		// Etherana Coder privacy-first: disable proactive/background extension recommendations.
+		void this.galleryService;
+		void this.environmentService;
+		return false;
 	}
 
 	private async activateProactiveRecommendations(): Promise<void> {

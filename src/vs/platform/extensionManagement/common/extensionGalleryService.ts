@@ -564,7 +564,10 @@ export abstract class AbstractExtensionGalleryService implements IExtensionGalle
 	}
 
 	isEnabled(): boolean {
-		return this.extensionGalleryManifestService.isEnabled();
+		// Etherana Coder privacy-first: remote extension gallery is disabled by default.
+		// Local installed extensions and local VSIX installs remain available through extension management.
+		void this.extensionGalleryManifestService;
+		return false;
 	}
 
 	getExtensions(extensionInfos: ReadonlyArray<IExtensionInfo>, token: CancellationToken): Promise<IGalleryExtension[]>;
