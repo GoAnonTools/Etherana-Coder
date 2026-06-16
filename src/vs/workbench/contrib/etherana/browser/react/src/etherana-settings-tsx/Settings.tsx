@@ -803,6 +803,21 @@ export const AIInstructionsBox = () => {
 	/>
 }
 
+export const CustomSystemPromptBox = () => {
+	const accessor = useAccessor()
+	const etheranaSettingsService = accessor.get('IEtheranaSettingsService')
+	const etheranaSettingsState = useSettingsState()
+	return <EtheranaInputBox2
+		className='min-h-[300px] p-3 rounded-sm font-mono text-[11px] leading-relaxed'
+		initValue={etheranaSettingsState.globalSettings.customSystemPrompt}
+		placeholder={`You are Etherana Coder...`}
+		multiline
+		onChangeText={(newText: string) => {
+			etheranaSettingsService.setGlobalSetting('customSystemPrompt', newText)
+		}}
+	/>
+}
+
 const TerminalMemorySettings = () => {
 	const accessor = useAccessor();
 	const settingsService = accessor.get('IEtheranaSettingsService');
@@ -1697,14 +1712,39 @@ export const Settings = () => {
 								<div className='max-w-[600px]'>
 									<h2 className={`text-3xl mb-2`}>AI Instructions</h2>
 									<h4 className={`text-etherana-fg-3 mb-4`}>
-										<ChatMarkdownRender inPTag={true} string={`
-System instructions to include with all AI requests.
-Alternatively, place a \`.etheranarules\` file in the root of your workspace.
-								`} chatMessageLocation={undefined} />
+										<ChatMarkdownRender inPTag={true} string={`System instructions to include with all AI requests. Alternatively, place a \`.etheranarules\` file in the root of your workspace.`} chatMessageLocation={undefined} />
 									</h4>
 									<ErrorBoundary>
 										<AIInstructionsBox />
 									</ErrorBoundary>
+
+									{/* --- Custom System Prompt --- */}
+									<div className='my-8'>
+										<h2 className={`text-3xl mb-2`}>Custom System Prompt</h2>
+										<h4 className={`text-etherana-fg-3 mb-4`}>
+											<ChatMarkdownRender inPTag={true} string={`Override the default system prompt with your own. Etherana will still append dynamic information like workspace folders, open files, and tool definitions to the end of your prompt.`} chatMessageLocation={undefined} />
+										</h4>
+										<div className='my-4'>
+											<ErrorBoundary>
+												<div className='flex items-center gap-x-2 mb-4'>
+													<EtheranaSwitch
+														size='xs'
+														value={settingsState.globalSettings.useCustomSystemPrompt}
+														onChange={(newValue) => {
+															etheranaSettingsService.setGlobalSetting('useCustomSystemPrompt', newValue);
+														}}
+													/>
+													<span className='text-etherana-fg-3 text-xs pointer-events-none'>
+														{'Use custom system prompt'}
+													</span>
+												</div>
+												{settingsState.globalSettings.useCustomSystemPrompt && (
+													<CustomSystemPromptBox />
+												)}
+											</ErrorBoundary>
+										</div>
+									</div>
+
 									{/* --- Disable System Message Toggle --- */}
 									<div className='my-4'>
 										<ErrorBoundary>

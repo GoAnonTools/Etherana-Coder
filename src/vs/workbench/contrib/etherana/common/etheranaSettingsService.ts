@@ -295,6 +295,12 @@ class EtheranaSettingsService extends Disposable implements IEtheranaSettingsSer
 			// add disableSystemMessage feature
 			if (readS.globalSettings.disableSystemMessage === undefined) readS.globalSettings.disableSystemMessage = false;
 
+			// add useCustomSystemPrompt and customSystemPrompt features
+			if (readS.globalSettings.useCustomSystemPrompt === undefined) {
+				readS.globalSettings.useCustomSystemPrompt = defaultGlobalSettings.useCustomSystemPrompt;
+				readS.globalSettings.customSystemPrompt = defaultGlobalSettings.customSystemPrompt;
+			}
+
 			// add autoAcceptLLMChanges feature
 			if (readS.globalSettings.autoAcceptLLMChanges === undefined) readS.globalSettings.autoAcceptLLMChanges = false;
 

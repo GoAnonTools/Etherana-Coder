@@ -603,7 +603,8 @@ class ConvertToLLMMessageService extends Disposable implements IConvertToLLMMess
 			}
 		}))
 
-		const systemMessage = chat_systemMessage({ workspaceFolders, openedURIs, directoryStr, activeURI, persistentTerminalIDs, terminalMemory, safetyMode, mcpTools, includeXMLToolDefinitions })
+		const { useCustomSystemPrompt, customSystemPrompt } = this.etheranaSettingsService.state.globalSettings;
+		const systemMessage = chat_systemMessage({ workspaceFolders, openedURIs, directoryStr, activeURI, persistentTerminalIDs, terminalMemory, safetyMode, mcpTools, includeXMLToolDefinitions, customPrompt: useCustomSystemPrompt ? customSystemPrompt : undefined })
 		return systemMessage
 	}
 

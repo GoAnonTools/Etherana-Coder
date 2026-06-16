@@ -427,7 +427,7 @@ const systemToolsXMLPrompt = (safetyMode: SafetyMode, mcpTools: InternalToolInfo
 // ======================================================== chat (normal, gather, agent) ========================================================
 
 
-export const chat_systemMessage = ({ workspaceFolders, openedURIs, activeURI, persistentTerminalIDs, terminalMemory, directoryStr, safetyMode: mode, mcpTools, includeXMLToolDefinitions }: { workspaceFolders: string[], directoryStr: string, openedURIs: string[], activeURI: string | undefined, persistentTerminalIDs: string[], terminalMemory: { id: string, output: string }[], safetyMode: SafetyMode, mcpTools: InternalToolInfo[] | undefined, includeXMLToolDefinitions: boolean }) => {
+export const chat_systemMessage = ({ workspaceFolders, openedURIs, activeURI, persistentTerminalIDs, terminalMemory, directoryStr, safetyMode: mode, mcpTools, includeXMLToolDefinitions, customPrompt }: { workspaceFolders: string[], directoryStr: string, openedURIs: string[], activeURI: string | undefined, persistentTerminalIDs: string[], terminalMemory: { id: string, output: string }[], safetyMode: SafetyMode, mcpTools: InternalToolInfo[] | undefined, includeXMLToolDefinitions: boolean, customPrompt?: string }) => {
 	const header = (`You are an expert coding ${mode === 'agent' ? 'agent' : mode === 'edit' ? 'editor' : 'observer'} whose job is \
 ${mode === 'agent' ? `to help the user develop, run, and make changes to their codebase.`
 			: mode === 'edit' ? `to help the user make approved changes to their codebase.`
@@ -520,10 +520,16 @@ ${details.map((d, i) => `${i + 1}. ${d}`).join('\n\n')}`)
 
 	// return answer
 	const ansStrs: string[] = []
-	ansStrs.push(header)
+	if (customPrompt) {
+		ansStrs.push(customPrompt)
+	} else {
+		ansStrs.push(header)
+	}
 	ansStrs.push(sysInfo)
 	if (toolDefinitions) ansStrs.push(toolDefinitions)
-	ansStrs.push(importantDetails)
+	if (!customPrompt) {
+		ansStrs.push(importantDetails)
+	}
 	ansStrs.push(fsInfo)
 
 	const fullSystemMsgStr = ansStrs
