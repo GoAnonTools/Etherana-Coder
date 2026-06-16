@@ -348,7 +348,7 @@ export class BrowserWindow extends BaseWindow {
 									},
 									{
 										label: localize({ key: 'learnMore', comment: ['&& denotes a mnemonic'] }, "&&Learn More"),
-										run: () => this.openerService.open(URI.parse('https://aka.ms/allow-vscode-popup'))
+										run: () => undefined
 									}
 								],
 								cancelButton: true

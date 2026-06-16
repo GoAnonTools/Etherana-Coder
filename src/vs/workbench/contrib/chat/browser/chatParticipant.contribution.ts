@@ -568,7 +568,7 @@ Registry.as<IExtensionFeaturesRegistry>(Extensions.ExtensionFeaturesRegistry).re
 // 			id: '_movedEditsView.learnMore',
 // 			handler: async (accessor: ServicesAccessor) => {
 // 				const openerService = accessor.get(IOpenerService);
-// 				openerService.open(URI.parse('https://aka.ms/vscode-chat-modes'));
+// Etherana Coder privacy-first: external chat modes help link removed.
 // 			}
 // 		}));
 // 	}

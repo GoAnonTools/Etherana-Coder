@@ -1682,7 +1682,7 @@ export class TerminalInstance extends Disposable implements ITerminalInstance {
 				commandId: TerminalCommandId.ShellIntegrationLearnMore,
 				label: nls.localize('shellIntegration.learnMore', "Learn more about shell integration"),
 				run: () => {
-					this._openerService.open('https://code.visualstudio.com/docs/editor/integrated-terminal#_shell-integration');
+					void this._openerService;
 				}
 			}, {
 				commandId: 'workbench.action.openSettings',

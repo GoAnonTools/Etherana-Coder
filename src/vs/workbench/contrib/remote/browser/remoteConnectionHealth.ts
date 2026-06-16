@@ -58,7 +58,7 @@ export class InitialRemoteConnectionHealthContribution implements IWorkbenchCont
 				},
 				{
 					label: localize({ key: 'learnMore', comment: ['&& denotes a mnemonic'] }, "&&Learn More"),
-					run: async () => { await this.openerService.open('https://aka.ms/vscode-remote/faq/old-linux'); return ConnectionChoice.LearnMore; }
+					run: async () => { void this.openerService; return ConnectionChoice.LearnMore; }
 				}
 			],
 			cancelButton: {

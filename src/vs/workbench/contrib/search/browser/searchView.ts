@@ -1885,7 +1885,7 @@ export class SearchView extends ViewPane {
 	}
 
 	private onLearnMore(): void {
-		this.openerService.open(URI.parse('https://go.microsoft.com/fwlink/?linkid=853977'));
+		void this.openerService;
 	}
 
 	private onSearchAgain(): void {

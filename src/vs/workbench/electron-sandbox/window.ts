@@ -225,7 +225,7 @@ export class NativeWindow extends BaseWindow {
 				},
 				{
 					label: localize('learnMore', "Learn More"),
-					run: () => this.openerService.open('https://go.microsoft.com/fwlink/?linkid=2149667')
+					run: () => undefined
 				}]
 			);
 		});
@@ -236,7 +236,7 @@ export class NativeWindow extends BaseWindow {
 				localize('keychainWriteError', "Writing login information to the keychain failed with error '{0}'.", message),
 				[{
 					label: localize('troubleshooting', "Troubleshooting Guide"),
-					run: () => this.openerService.open('https://go.microsoft.com/fwlink/?linkid=2190713')
+					run: () => undefined
 				}]
 			);
 		});
@@ -743,7 +743,7 @@ export class NativeWindow extends BaseWindow {
 					message,
 					[{
 						label: localize('learnMore', "Learn More"),
-						run: () => this.openerService.open(URI.parse('https://aka.ms/vscode-faq-old-macOS'))
+						run: () => undefined
 					}],
 					{
 						neverShowAgain: { id: 'macoseol', isSecondary: true, scope: NeverShowAgainScope.APPLICATION },
@@ -761,7 +761,7 @@ export class NativeWindow extends BaseWindow {
 			location: ProgressLocation.Window,
 			delay: 1600,
 			buttons: [localize('learnMore', "Learn More")]
-		}, () => shellEnv, () => this.openerService.open('https://go.microsoft.com/fwlink/?linkid=2149667'));
+		}, () => shellEnv, () => undefined);
 	}
 
 	private setupDriver(): void {

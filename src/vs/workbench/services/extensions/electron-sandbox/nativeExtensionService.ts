@@ -215,8 +215,8 @@ export class NativeExtensionService extends AbstractExtensionService implements 
 						label: nls.localize('learnMore', "Learn More"),
 						run: () => {
 							this._instantiationService.invokeFunction(accessor => {
-								const openerService = accessor.get(IOpenerService);
-								openerService.open('https://aka.ms/vscode-extension-bisect');
+								void accessor.get(IOpenerService);
+								void 0;
 							});
 						}
 					});
