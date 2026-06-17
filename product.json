@@ -7,8 +7,8 @@
 	"dataFolderName": ".etherana-coder",
 	"win32MutexName": "etherana-coder",
 	"licenseName": "Apache-2.0",
-	"licenseUrl": "https://github.com/GoAnonTools/Etherana-Coder/blob/main/LICENSE.md",
-	"serverLicenseUrl": "https://github.com/GoAnonTools/Etherana-Coder/blob/main/LICENSE.md",
+	"licenseUrl": "https://goanon.pro",
+	"serverLicenseUrl": "https://goanon.pro",
 	"serverGreeting": [],
 	"serverLicense": [],
 	"serverLicensePrompt": "",
@@ -33,7 +33,7 @@
 	"urlProtocol": "etherana",
 	"builtInExtensions": [],
 	"linkProtectionTrustedDomains": [
-		"https://github.com/GoAnonTools/Etherana-Coder",
+		"https://goanon.pro",
 		"https://ollama.com"
 	]
 }
