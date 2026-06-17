@@ -199,3 +199,15 @@
 .extensions-viewlet .codicon-info::before {
 	color: var(--vscode-editorInfo-foreground);
 }
+
+/* Etherana Coder: third-party extension privacy warning */
+.extensions-viewlet > .header > .extensions-privacy-warning {
+	margin: 6px 20px 0 20px;
+	padding: 6px 8px;
+	border: 1px solid var(--vscode-inputValidation-warningBorder, rgba(255, 193, 7, 0.35));
+	border-radius: 4px;
+	background: var(--vscode-inputValidation-warningBackground, rgba(255, 193, 7, 0.08));
+	color: var(--vscode-descriptionForeground);
+	font-size: 11px;
+	line-height: 1.4;
+}

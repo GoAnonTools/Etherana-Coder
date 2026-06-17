@@ -620,6 +620,12 @@ export class ExtensionsViewPaneContainer extends ViewPaneContainer implements IE
 			actionViewItemProvider: (action, options) => createActionViewItem(this.instantiationService, action, options)
 		}));
 
+		const privacyWarning = append(this.header, $('.extensions-privacy-warning'));
+		privacyWarning.textContent = localize(
+			'etheranaExtensionsPrivacyWarning',
+			'Extensions are third-party code and may contact external services. Only install extensions you trust.'
+		);
+
 		// Register DragAndDrop support
 		this._register(new DragAndDropObserver(this.root, {
 			onDragEnter: (e: DragEvent) => {
