@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------*/
 
 import { promisify } from 'util'
-import { exec as _exec } from 'child_process'
+import { execFile as _execFile } from 'child_process'
 import { IEtheranaSCMService } from '../common/etheranaSCMTypes.js'
 
 interface NumStat {
@@ -13,23 +13,30 @@ interface NumStat {
 	removed: number
 }
 
-const exec = promisify(_exec)
+const execFile = promisify(_execFile)
 
 //8000 and 10 were chosen after some experimentation on small-to-moderately sized changes
 const MAX_DIFF_LENGTH = 8000
 const MAX_DIFF_FILES = 10
 
-const git = async (command: string, path: string): Promise<string> => {
-	const { stdout, stderr } = await exec(`${command}`, { cwd: path })
+const git = async (args: string[], path: string): Promise<string> => {
+	const { stdout, stderr } = await execFile('git', args, { cwd: path })
 	if (stderr) {
-		throw new Error(stderr)
+		throw new Error(String(stderr))
 	}
-	return stdout.trim()
+	return String(stdout).trim()
+}
+
+const stagedArgs = (useStagedChanges: boolean): string[] => useStagedChanges ? ['--staged'] : []
+
+const assertSafeGitRef = (value: string, label: string): void => {
+	if (!value || value.startsWith('-') || /[\0\r\n]/.test(value)) {
+		throw new Error(`Unsafe ${label}`)
+	}
 }
 
 const getNumStat = async (path: string, useStagedChanges: boolean): Promise<NumStat[]> => {
-	const staged = useStagedChanges ? '--staged' : ''
-	const output = await git(`git diff --numstat ${staged}`, path)
+	const output = await git(['diff', '--numstat', ...stagedArgs(useStagedChanges)], path)
 	return output
 		.split('\n')
 		.map((line) => {
@@ -43,13 +50,12 @@ const getNumStat = async (path: string, useStagedChanges: boolean): Promise<NumS
 }
 
 const getSampledDiff = async (file: string, path: string, useStagedChanges: boolean): Promise<string> => {
-	const staged = useStagedChanges ? '--staged' : ''
-	const diff = await git(`git diff --unified=0 --no-color ${staged} -- "${file}"`, path)
+	const diff = await git(['diff', '--unified=0', '--no-color', ...stagedArgs(useStagedChanges), '--', file], path)
 	return diff.slice(0, MAX_DIFF_LENGTH)
 }
 
 const hasStagedChanges = async (path: string): Promise<boolean> => {
-	const output = await git('git diff --staged --name-only', path)
+	const output = await git(['diff', '--staged', '--name-only'], path)
 	return output.length > 0
 }
 
@@ -58,8 +64,7 @@ export class EtheranaSCMService implements IEtheranaSCMService {
 
 	async gitStat(path: string): Promise<string> {
 		const useStagedChanges = await hasStagedChanges(path)
-		const staged = useStagedChanges ? '--staged' : ''
-		return git(`git diff --stat ${staged}`, path)
+		return git(['diff', '--stat', ...stagedArgs(useStagedChanges)], path)
 	}
 
 	async gitSampledDiffs(path: string): Promise<string> {
@@ -73,11 +78,11 @@ export class EtheranaSCMService implements IEtheranaSCMService {
 	}
 
 	gitBranch(path: string): Promise<string> {
-		return git('git branch --show-current', path)
+		return git(['branch', '--show-current'], path)
 	}
 
 	gitLog(path: string): Promise<string> {
-		return git('git log --pretty=format:"%h|%s|%ad" --date=short --no-merges -n 5', path)
+		return git(['log', '--pretty=format:%h|%s|%ad', '--date=short', '--no-merges', '-n', '5'], path)
 	}
 
 	async gitCheckoutBranch(path: string, branchName: string): Promise<void> {
@@ -85,12 +90,14 @@ export class EtheranaSCMService implements IEtheranaSCMService {
 		// However, for safety in this automated context, we check if we're already on that branch first.
 		const current = await this.gitBranch(path)
 		if (current === branchName) return
-		await git(`git checkout -b "${branchName}"`, path)
+		assertSafeGitRef(branchName, 'branch name')
+		await git(['checkout', '-b', branchName], path)
 	}
 
 	async gitPush(path: string): Promise<void> {
 		const branch = await this.gitBranch(path)
 		// Push the current branch to origin
-		await git(`git push origin "${branch}"`, path)
+		assertSafeGitRef(branch, 'branch name')
+		await git(['push', 'origin', branch], path)
 	}
 }
