@@ -294,10 +294,17 @@ class EtheranaSettingsService extends Disposable implements IEtheranaSettingsSer
 			}
 			// add disableSystemMessage feature
 			if (readS.globalSettings.disableSystemMessage === undefined) readS.globalSettings.disableSystemMessage = false;
+			// Etherana Coder now always uses either the built-in default system prompt or the user's custom prompt.
+			readS.globalSettings.disableSystemMessage = false;
 
 			// add useCustomSystemPrompt and customSystemPrompt features
 			if (readS.globalSettings.useCustomSystemPrompt === undefined) {
 				readS.globalSettings.useCustomSystemPrompt = defaultGlobalSettings.useCustomSystemPrompt;
+			}
+			if (
+				readS.globalSettings.customSystemPrompt === undefined ||
+				readS.globalSettings.customSystemPrompt.trim().startsWith('# Etherana Coder — Editor System Prompt')
+			) {
 				readS.globalSettings.customSystemPrompt = defaultGlobalSettings.customSystemPrompt;
 			}
 

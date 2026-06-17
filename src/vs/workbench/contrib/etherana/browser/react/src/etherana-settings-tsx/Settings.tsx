@@ -1724,51 +1724,35 @@ export const Settings = () => {
 										<AIInstructionsBox />
 									</ErrorBoundary>
 
-									{/* --- Editor System Prompt --- */}
+									{/* --- System Prompt --- */}
 									<div className='my-8'>
-										<h2 className={`text-3xl mb-2`}>Editor System Prompt</h2>
+										<h2 className={`text-3xl mb-2`}>System Prompt</h2>
 										<h4 className={`text-etherana-fg-3 mb-4`}>
-											<ChatMarkdownRender inPTag={true} string={`Etherana Coder's main editor-native system prompt. Enable editing only if you want to customize the assistant's core coding behavior. Etherana will still append dynamic workspace context, open files, and tool definitions.`} chatMessageLocation={undefined} />
+											<ChatMarkdownRender inPTag={true} string={`Use Etherana Coder's built-in default system prompt, or turn this off to provide your own custom prompt. The default prompt is built in and is not displayed here.`} chatMessageLocation={undefined} />
 										</h4>
 										<div className='my-4'>
 											<ErrorBoundary>
-												<div className='flex items-center gap-x-2 mb-4'>
+												<div className='flex items-center gap-x-2 mb-2'>
 													<EtheranaSwitch
 														size='xs'
-														value={settingsState.globalSettings.useCustomSystemPrompt}
+														value={!settingsState.globalSettings.useCustomSystemPrompt}
 														onChange={(newValue) => {
-															etheranaSettingsService.setGlobalSetting('useCustomSystemPrompt', newValue);
+															etheranaSettingsService.setGlobalSetting('useCustomSystemPrompt', !newValue);
 														}}
 													/>
 													<span className='text-etherana-fg-3 text-xs pointer-events-none'>
-														{'Edit editor system prompt'}
+														{'Use default Etherana system prompt'}
 													</span>
+												</div>
+												<div className='text-etherana-fg-3 text-xs mt-1 mb-4'>
+													{settingsState.globalSettings.useCustomSystemPrompt
+														? 'Custom prompt is active. Etherana will use the prompt below plus dynamic workspace context, open files, and tool definitions.'
+														: 'Default prompt is active. The built-in prompt remains hidden.'}
 												</div>
 												{settingsState.globalSettings.useCustomSystemPrompt && (
 													<CustomSystemPromptBox />
 												)}
 											</ErrorBoundary>
-										</div>
-									</div>
-
-									{/* --- Disable System Message Toggle --- */}
-									<div className='my-4'>
-										<ErrorBoundary>
-											<div className='flex items-center gap-x-2'>
-												<EtheranaSwitch
-													size='xs'
-													value={!!settingsState.globalSettings.disableSystemMessage}
-													onChange={(newValue) => {
-														etheranaSettingsService.setGlobalSetting('disableSystemMessage', newValue);
-													}}
-												/>
-												<span className='text-etherana-fg-3 text-xs pointer-events-none'>
-													{'Disable system message'}
-												</span>
-											</div>
-										</ErrorBoundary>
-										<div className='text-etherana-fg-3 text-xs mt-1'>
-											{`When disabled, Etherana will not include anything in the system message except for content you specified above.`}
 										</div>
 									</div>
 								</div>
