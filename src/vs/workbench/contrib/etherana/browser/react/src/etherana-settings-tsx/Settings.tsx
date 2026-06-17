@@ -1724,11 +1724,11 @@ export const Settings = () => {
 										<AIInstructionsBox />
 									</ErrorBoundary>
 
-									{/* --- Custom System Prompt --- */}
+									{/* --- Editor System Prompt --- */}
 									<div className='my-8'>
-										<h2 className={`text-3xl mb-2`}>Custom System Prompt</h2>
+										<h2 className={`text-3xl mb-2`}>Editor System Prompt</h2>
 										<h4 className={`text-etherana-fg-3 mb-4`}>
-											<ChatMarkdownRender inPTag={true} string={`Override the default system prompt with your own. Etherana will still append dynamic information like workspace folders, open files, and tool definitions to the end of your prompt.`} chatMessageLocation={undefined} />
+											<ChatMarkdownRender inPTag={true} string={`Etherana Coder's main editor-native system prompt. Enable editing only if you want to customize the assistant's core coding behavior. Etherana will still append dynamic workspace context, open files, and tool definitions.`} chatMessageLocation={undefined} />
 										</h4>
 										<div className='my-4'>
 											<ErrorBoundary>
@@ -1741,7 +1741,7 @@ export const Settings = () => {
 														}}
 													/>
 													<span className='text-etherana-fg-3 text-xs pointer-events-none'>
-														{'Use custom system prompt'}
+														{'Edit editor system prompt'}
 													</span>
 												</div>
 												{settingsState.globalSettings.useCustomSystemPrompt && (
