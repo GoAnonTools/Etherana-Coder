@@ -453,3 +453,13 @@
 	border-radius: 16px;
 	text-align: center;
 }
+
+/* Etherana Coder: keep Linux titlebar and command center aligned with workbench zoom. */
+.monaco-workbench.linux .part.titlebar > .titlebar-container.counter-zoom {
+	zoom: 1;
+}
+
+.monaco-workbench.linux .part.titlebar > .titlebar-container.counter-zoom .menubar .menubar-menu-button > .menubar-menu-items-holder.monaco-menu-container,
+.monaco-workbench.linux .part.titlebar > .titlebar-container.counter-zoom .monaco-toolbar .dropdown-action-container {
+	zoom: 1;
+}

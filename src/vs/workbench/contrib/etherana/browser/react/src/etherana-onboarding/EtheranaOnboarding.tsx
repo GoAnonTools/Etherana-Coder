@@ -96,7 +96,7 @@ const FadeIn = ({ children, className, delayMs = 0, durationMs, ...props }: { ch
 //  New AddProvidersPage Component and helpers
 // =============================================
 
-const tabNames = ['Free', 'Paid', 'Local'] as const;
+const tabNames = ['Local', 'Free', 'Paid'] as const;
 
 type TabName = typeof tabNames[number] | 'Cloud/Other';
 
@@ -112,10 +112,10 @@ const providerNamesOfTab: Record<TabName, ProviderName[]> = {
 };
 
 const descriptionOfTab: Record<TabName, string> = {
-	Free: `Providers with a 100% free tier. Add as many as you'd like!`,
-	Paid: `Connect directly with any provider (bring your own key).`,
-	Local: `Active providers should appear automatically. Add as many as you'd like! `,
-	'Cloud/Other': `Add as many as you'd like! Reach out for custom configuration requests.`,
+	Free: `Optional cloud providers with a free tier. You can add these later.`,
+	Paid: `Optional paid cloud providers. Bring your own key if you want to use them.`,
+	Local: `Recommended for privacy-first use. Local providers can be configured now or later.`,
+	'Cloud/Other': `Optional advanced providers and OpenAI-compatible endpoints. You can configure these later.`,
 };
 
 
@@ -128,7 +128,7 @@ const featureNameMap: { display: string, featureName: FeatureName }[] = [
 ];
 
 const AddProvidersPage = ({ pageIndex, setPageIndex }: { pageIndex: number, setPageIndex: (index: number) => void }) => {
-	const [currentTab, setCurrentTab] = useState<TabName>('Free');
+	const [currentTab, setCurrentTab] = useState<TabName>('Local');
 	const settingsState = useSettingsState();
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -199,6 +199,27 @@ const AddProvidersPage = ({ pageIndex, setPageIndex }: { pageIndex: number, setP
 			<div className="w-full max-w-xl mt-4 mb-10">
 				<div className="text-4xl font-light my-4 w-full">{currentTab}</div>
 				<div className="text-sm opacity-80 text-etherana-fg-3 my-4 w-full">{descriptionOfTab[currentTab]}</div>
+
+				<div className="flex flex-col sm:flex-row gap-2 mt-6">
+					<EtheranaButtonBgDarken
+						className="text-sm px-4 py-2 bg-[#0e70c0] text-white"
+						onClick={() => {
+							setErrorMessage(null);
+							setPageIndex(pageIndex + 1);
+						}}
+					>
+						Continue without provider
+					</EtheranaButtonBgDarken>
+					<button
+						className="text-sm px-4 py-2 rounded-md border border-etherana-border-4 text-etherana-fg-2 hover:bg-etherana-bg-2"
+						onClick={() => {
+							setErrorMessage(null);
+							setPageIndex(pageIndex + 1);
+						}}
+					>
+						Skip setup for now
+					</button>
+				</div>
 			</div>
 
 			{providerNamesOfTab[currentTab].map((providerName) => (
@@ -267,15 +288,8 @@ const AddProvidersPage = ({ pageIndex, setPageIndex }: { pageIndex: number, setP
 					<PreviousButton onClick={() => setPageIndex(pageIndex - 1)} />
 					<NextButton
 						onClick={() => {
-							const isDisabled = isFeatureNameDisabled('Chat', settingsState)
-
-							if (!isDisabled) {
-								setPageIndex(pageIndex + 1);
-								setErrorMessage(null);
-							} else {
-								// Show error message
-								setErrorMessage("Please set up at least one Chat model before moving on.");
-							}
+							setErrorMessage(null);
+							setPageIndex(pageIndex + 1);
 						}}
 					/>
 				</div>
