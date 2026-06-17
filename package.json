@@ -74,9 +74,11 @@
     "build:react": "npm run buildreact",
     "build:core": "npm run compile",
     "build:extensions": "npm run compile-extensions-build",
-    "dev": "./scripts/code.sh",
+    "dev": "npm run sync-extension-dev-output && ./scripts/code.sh",
     "build:production": "npm-run-all -s build:react build:core:production build:extensions",
-    "build:core:production": "npm run compile-build"
+    "build:core:production": "npm run compile-build",
+    "sync-extension-dev-output": "node scripts/sync-extension-dev-output.cjs",
+    "postcompile": "npm run sync-extension-dev-output"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.40.0",
