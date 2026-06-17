@@ -29,9 +29,10 @@ const forbiddenChecks = [
     ],
     include: () => true,
     patterns: [
-      /new\s+TelemetryReporter\s*\(/,
-      /new\s+VsCodeTelemetryReporter\s*\(/,
+      /from\s+['"]@vscode\/extension-telemetry['"]/,
+      /require\(['"]@vscode\/extension-telemetry['"]\)/,
       /context\.extension\.packageJSON\.aiKey/,
+      /new\s+TelemetryReporter\s*\([^)]*aiKey/,
     ],
   },
   {

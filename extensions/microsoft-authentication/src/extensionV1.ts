@@ -8,8 +8,13 @@ import { Environment, EnvironmentParameters } from '@azure/ms-rest-azure-env';
 import { AzureActiveDirectoryService, IStoredSession } from './AADHelper';
 import { BetterTokenStorage } from './betterSecretStorage';
 import { UriEventHandler } from './UriEventHandler';
-import type TelemetryReporter from '@vscode/extension-telemetry';
 import Logger from './logger';
+
+type TelemetryReporter = {
+	sendTelemetryEvent(eventName: string, properties?: Record<string, string>, measurements?: Record<string, number>): void;
+	sendTelemetryErrorEvent?(eventName: string, properties?: Record<string, string>, measurements?: Record<string, number>, errorProps?: string[]): void;
+	dispose?(): void | Promise<void>;
+};
 
 async function initMicrosoftSovereignCloudAuthProvider(context: vscode.ExtensionContext, telemetryReporter: TelemetryReporter, uriHandler: UriEventHandler, tokenStorage: BetterTokenStorage<IStoredSession>): Promise<vscode.Disposable | undefined> {
 	const environment = vscode.workspace.getConfiguration('microsoft-sovereign-cloud').get<string | undefined>('environment');

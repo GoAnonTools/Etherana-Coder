@@ -13,8 +13,13 @@ import { LoopbackAuthServer } from './node/authServer';
 import { base64Decode } from './node/buffer';
 import fetch from './node/fetch';
 import { UriEventHandler } from './UriEventHandler';
-import type TelemetryReporter from '@vscode/extension-telemetry';
 import { Environment } from '@azure/ms-rest-azure-env';
+
+type TelemetryReporter = {
+	sendTelemetryEvent(eventName: string, properties?: Record<string, string>, measurements?: Record<string, number>): void;
+	sendTelemetryErrorEvent?(eventName: string, properties?: Record<string, string>, measurements?: Record<string, number>, errorProps?: string[]): void;
+	dispose?(): void | Promise<void>;
+};
 
 const redirectUrl = '';
 const defaultActiveDirectoryEndpointUrl = Environment.AzureCloud.activeDirectoryEndpointUrl;
