@@ -250,7 +250,7 @@ export class NativeWindow extends BaseWindow {
 					run: () => {
 						const quality = this.productService.quality;
 						const stableURL = 'https://goanon.pro';
-						const insidersURL = 'https://goanon.pro&build=insiders';
+						const insidersURL = 'https://goanon.pro?build=insiders';
 						this.openerService.open(quality === 'stable' ? stableURL : insidersURL);
 					}
 				}],

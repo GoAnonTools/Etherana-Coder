@@ -186,20 +186,8 @@ class EtheranaUpdateWorkbenchContribution extends Disposable implements IWorkben
 	) {
 		super()
 
-		const autoCheck = () => {
-			performEtheranaCheck(false, notifService, etheranaUpdateService, metricsService, updateService)
-		}
-
-		// check once 5 seconds after mount
-		// check every 3 hours
-		const { window } = dom.getActiveWindow()
-
-		const initId = window.setTimeout(() => autoCheck(), 5 * 1000)
-		this._register({ dispose: () => window.clearTimeout(initId) })
-
-
-		const intervalId = window.setInterval(() => autoCheck(), 3 * 60 * 60 * 1000) // every 3 hrs
-		this._register({ dispose: () => window.clearInterval(intervalId) })
+		// Etherana Coder privacy-first: do not schedule automatic update polling.
+		// The manual update command remains available and returns a local disabled-update message.
 
 	}
 }
