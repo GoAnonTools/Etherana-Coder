@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { spawn } from 'child_process';
-import { realpath, watch } from 'fs';
-import { timeout } from '../../../base/common/async.js';
+import { realpath } from 'fs';
 import { Emitter, Event } from '../../../base/common/event.js';
 import * as path from '../../../base/common/path.js';
 import { IEnvironmentMainService } from '../../environment/electron-main/environmentMainService.js';
@@ -42,19 +41,9 @@ abstract class AbstractUpdateService implements IUpdateService {
 			return;
 		}
 
-		this.setState(State.Idle(this.getUpdateType()));
-
-		// Start checking for updates after 30 seconds
-		this.scheduleCheckForUpdates(30 * 1000).then(undefined, err => this.logService.error(err));
-	}
-
-	private scheduleCheckForUpdates(delay = 60 * 60 * 1000): Promise<void> {
-		return timeout(delay)
-			.then(() => this.checkForUpdates(false))
-			.then(() => {
-				// Check again after 1 hour
-				return this.scheduleCheckForUpdates(60 * 60 * 1000);
-			});
+		// Etherana Coder privacy-first: do not start automatic Snap update polling.
+		this.setState(State.Disabled(DisablementReason.ManuallyDisabled));
+		this.logService.info('update#ctor - automatic Snap update polling is disabled in Etherana Coder');
 	}
 
 	async checkForUpdates(explicit: boolean): Promise<void> {
@@ -114,16 +103,8 @@ export class SnapUpdateService extends AbstractUpdateService {
 	) {
 		super(lifecycleMainService, environmentMainService, logService);
 
-		const watcher = watch(path.dirname(this.snap));
-		const onChange = Event.fromNodeEventEmitter(watcher, 'change', (_, fileName: string) => fileName);
-		const onCurrentChange = Event.filter(onChange, n => n === 'current');
-		const onDebouncedCurrentChange = Event.debounce(onCurrentChange, (_, e) => e, 2000);
-		const listener = onDebouncedCurrentChange(() => this.checkForUpdates(false));
-
-		lifecycleMainService.onWillShutdown(() => {
-			listener.dispose();
-			watcher.close();
-		});
+		// Etherana Coder privacy-first: do not watch Snap's current symlink for automatic update checks.
+		void lifecycleMainService;
 	}
 
 	protected doCheckForUpdates(): void {
