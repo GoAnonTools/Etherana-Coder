@@ -12,7 +12,6 @@ import { INotificationActions, INotificationHandle, INotificationService } from 
 import { IMetricsService } from '../common/metricsService.js';
 import { IEtheranaUpdateService } from '../common/etheranaUpdateService.js';
 import { IWorkbenchContribution, registerWorkbenchContribution2, WorkbenchPhase } from '../../../common/contributions.js';
-import * as dom from '../../../../base/browser/dom.js';
 import { IUpdateService } from '../../../../platform/update/common/update.js';
 import { EtheranaCheckUpdateRespose } from '../common/etheranaUpdateServiceTypes.js';
 import { IAction } from '../../../../base/common/actions.js';
