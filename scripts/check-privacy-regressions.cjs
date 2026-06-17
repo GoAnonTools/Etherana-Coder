@@ -80,11 +80,15 @@ const forbiddenChecks = [
       'src/vs/code/node/cliProcessMain.ts',
       'src/vs/code/electron-utility/sharedProcess/sharedProcessMain.ts',
       'src/vs/code/electron-main/app.ts',
+      'src/vs/workbench/services/telemetry/browser/telemetryService.ts',
+      'src/vs/workbench/contrib/debug/node/telemetryApp.ts',
+      'src/vs/base/common/product.ts',
     ],
     include: () => true,
     patterns: [
       /"aiConfig"\s*:/,
       /new\s+OneDataSystemAppender\s*\(/,
+      /new\s+OneDataSystemWebAppender\s*\(/,
       /productService\.aiConfig/,
       /ariaKey/,
     ],
@@ -110,6 +114,7 @@ const forbiddenChecks = [
       'extensions/github-authentication/package.json',
       'extensions/microsoft-authentication/package.json',
       'product.json',
+      'src/vs/workbench/api/browser/mainThreadAuthentication.ts',
     ],
     include: () => true,
     patterns: [

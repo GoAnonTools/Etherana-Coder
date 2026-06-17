@@ -133,9 +133,6 @@ export interface IProductConfiguration {
 	readonly enabledTelemetryLevels?: { error: boolean; usage: boolean };
 	readonly enableTelemetry?: boolean;
 	readonly openToWelcomeMainPage?: boolean;
-	readonly aiConfig?: {
-		readonly ariaKey: string;
-	};
 
 	readonly documentationUrl?: string;
 	readonly serverDocumentationUrl?: string;
