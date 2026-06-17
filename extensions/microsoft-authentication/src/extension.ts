@@ -6,9 +6,8 @@
 import { commands, env, ExtensionContext, l10n, window, workspace } from 'vscode';
 import * as extensionV1 from './extensionV1';
 import * as extensionV2 from './extensionV2';
-import { createExperimentationService } from './common/experimentation';
+import { createExperimentationService, IExperimentationService } from './common/experimentation';
 import { MicrosoftAuthenticationTelemetryReporter } from './common/telemetryReporter';
-import { IExperimentationService } from 'vscode-tas-client';
 import Logger from './logger';
 
 function shouldUseMsal(expService: IExperimentationService): boolean {
@@ -41,7 +40,7 @@ function shouldUseMsal(expService: IExperimentationService): boolean {
 
 let useMsal: boolean | undefined;
 export async function activate(context: ExtensionContext) {
-	const mainTelemetryReporter = new MicrosoftAuthenticationTelemetryReporter(context.extension.packageJSON.aiKey);
+	const mainTelemetryReporter = new MicrosoftAuthenticationTelemetryReporter();
 	const expService = await createExperimentationService(
 		context,
 		mainTelemetryReporter,

@@ -51,7 +51,7 @@ async function initMicrosoftSovereignCloudAuthProvider(
 
 	const authProvider = await MsalAuthProvider.create(
 		context,
-		new MicrosoftSovereignCloudAuthenticationTelemetryReporter(context.extension.packageJSON.aiKey),
+		new MicrosoftSovereignCloudAuthenticationTelemetryReporter(),
 		window.createOutputChannel(l10n.t('Microsoft Sovereign Cloud Authentication'), { log: true }),
 		uriHandler,
 		env

@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import * as tas from 'vscode-tas-client';
 
 import { IExperimentationTelemetryReporter } from './experimentTelemetryReporter';
 
@@ -12,20 +11,33 @@ interface ExperimentTypes {
 	// None for now.
 }
 
+interface NoOpExperimentationService {
+	getTreatmentVariableAsync<T>(_namespace: string, _name: string, _checkCache?: boolean): Promise<T | undefined>;
+}
+
+const noOpExperimentationService: NoOpExperimentationService = {
+	async getTreatmentVariableAsync<T>(): Promise<T | undefined> {
+		return undefined;
+	}
+};
+
 export class ExperimentationService {
-	private readonly _experimentationServicePromise: Promise<tas.IExperimentationService>;
-	private readonly _telemetryReporter: IExperimentationTelemetryReporter;
+	private readonly _experimentationServicePromise: Promise<NoOpExperimentationService>;
 
 	constructor(telemetryReporter: IExperimentationTelemetryReporter, id: string, version: string, globalState: vscode.Memento) {
-		this._telemetryReporter = telemetryReporter;
-		this._experimentationServicePromise = createTasExperimentationService(this._telemetryReporter, id, version, globalState);
+		void telemetryReporter;
+		void id;
+		void version;
+		void globalState;
+		this._experimentationServicePromise = Promise.resolve(noOpExperimentationService);
 	}
 
 	public async getTreatmentVariable<K extends keyof ExperimentTypes>(name: K, defaultValue: ExperimentTypes[K]): Promise<ExperimentTypes[K]> {
+		void name;
 		const experimentationService = await this._experimentationServicePromise;
 		try {
-			const treatmentVariable = experimentationService.getTreatmentVariableAsync('vscode', name, /*checkCache*/ true) as Promise<ExperimentTypes[K]>;
-			return treatmentVariable;
+			const treatmentVariable = await experimentationService.getTreatmentVariableAsync<ExperimentTypes[K]>('etherana', String(name), true);
+			return treatmentVariable ?? defaultValue;
 		} catch {
 			return defaultValue;
 		}
@@ -36,27 +48,10 @@ export async function createTasExperimentationService(
 	reporter: IExperimentationTelemetryReporter,
 	id: string,
 	version: string,
-	globalState: vscode.Memento): Promise<tas.IExperimentationService> {
-	let targetPopulation: tas.TargetPopulation;
-	switch (vscode.env.uriScheme) {
-		case 'vscode':
-			targetPopulation = tas.TargetPopulation.Public;
-			break;
-		case 'vscode-insiders':
-			targetPopulation = tas.TargetPopulation.Insiders;
-			break;
-		case 'vscode-exploration':
-			targetPopulation = tas.TargetPopulation.Internal;
-			break;
-		case 'code-oss':
-			targetPopulation = tas.TargetPopulation.Team;
-			break;
-		default:
-			targetPopulation = tas.TargetPopulation.Public;
-			break;
-	}
-
-	const experimentationService = tas.getExperimentationService(id, version, targetPopulation, reporter, globalState);
-	await experimentationService.initialFetch;
-	return experimentationService;
+	globalState: vscode.Memento): Promise<NoOpExperimentationService> {
+	void reporter;
+	void id;
+	void version;
+	void globalState;
+	return noOpExperimentationService;
 }

@@ -3,24 +3,24 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import * as vscode from 'vscode';
-import { getExperimentationService, IExperimentationService, IExperimentationTelemetry, TargetPopulation } from 'vscode-tas-client';
+
+export interface IExperimentationService {
+	getTreatmentVariable<T>(_namespace: string, _name: string): T | undefined;
+}
+
+const noOpExperimentationService: IExperimentationService = {
+	getTreatmentVariable<T>(): T | undefined {
+		return undefined;
+	}
+};
 
 export async function createExperimentationService(
 	context: vscode.ExtensionContext,
-	experimentationTelemetry: IExperimentationTelemetry,
+	experimentationTelemetry: unknown,
 	isPreRelease: boolean,
 ): Promise<IExperimentationService> {
-	const id = context.extension.id;
-	const version = context.extension.packageJSON['version'];
-
-	const service = getExperimentationService(
-		id,
-		version,
-		isPreRelease ? TargetPopulation.Insiders : TargetPopulation.Public,
-		experimentationTelemetry,
-		context.globalState,
-	) as unknown as IExperimentationService;
-	await service.initializePromise;
-	await service.initialFetch;
-	return service;
+	void context;
+	void experimentationTelemetry;
+	void isPreRelease;
+	return noOpExperimentationService;
 }
