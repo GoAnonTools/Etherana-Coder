@@ -24,6 +24,8 @@ const forbiddenChecks = [
       'extensions/typescript-language-features/src',
       'extensions/github-authentication/src',
       'extensions/microsoft-authentication/src',
+      'extensions/html-language-features/client/src',
+      'extensions/json-language-features/client/src',
     ],
     include: () => true,
     patterns: [
@@ -39,6 +41,8 @@ const forbiddenChecks = [
       'extensions/git/src',
       'extensions/merge-conflict/src',
       'extensions/markdown-language-features/src',
+      'extensions/html-language-features/client/src',
+      'extensions/json-language-features/client/src',
     ],
     include: file => file.endsWith('.ts'),
     patterns: [
@@ -57,6 +61,8 @@ const forbiddenChecks = [
       'extensions/typescript-language-features/src',
       'extensions/github-authentication/src',
       'extensions/microsoft-authentication/src',
+      'extensions/html-language-features/client/src',
+      'extensions/json-language-features/client/src',
     ],
     include: () => true,
     patterns: [

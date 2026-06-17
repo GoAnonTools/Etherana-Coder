@@ -9,7 +9,7 @@ import { startClient, LanguageClientConstructor, AsyncDisposable } from '../html
 import { ServerOptions, TransportKind, LanguageClientOptions, LanguageClient } from 'vscode-languageclient/node';
 import { TextDecoder } from 'util';
 import * as fs from 'fs';
-import TelemetryReporter from '@vscode/extension-telemetry';
+import TelemetryReporter from './telemetryReporter';
 
 
 let telemetry: TelemetryReporter | undefined;
@@ -19,7 +19,7 @@ let client: AsyncDisposable | undefined;
 export async function activate(context: ExtensionContext) {
 
 	const clientPackageJSON = getPackageInfo(context);
-	telemetry = new TelemetryReporter(clientPackageJSON.aiKey);
+	telemetry = new TelemetryReporter();
 
 	const serverMain = `./server/${clientPackageJSON.main.indexOf('/dist/') !== -1 ? 'dist' : 'out'}/node/htmlServerMain`;
 	const serverModule = context.asAbsolutePath(serverMain);
