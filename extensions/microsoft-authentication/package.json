@@ -28,16 +28,6 @@
     "workspace"
   ],
   "contributes": {
-    "authentication": [
-      {
-        "label": "Microsoft",
-        "id": "microsoft"
-      },
-      {
-        "label": "Microsoft Sovereign Cloud",
-        "id": "microsoft-sovereign-cloud"
-      }
-    ],
     "configuration": [
       {
         "title": "Microsoft Sovereign Cloud",

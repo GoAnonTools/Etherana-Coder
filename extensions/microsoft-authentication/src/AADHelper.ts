@@ -16,9 +16,9 @@ import { UriEventHandler } from './UriEventHandler';
 import type TelemetryReporter from '@vscode/extension-telemetry';
 import { Environment } from '@azure/ms-rest-azure-env';
 
-const redirectUrl = 'https://vscode.dev/redirect';
+const redirectUrl = '';
 const defaultActiveDirectoryEndpointUrl = Environment.AzureCloud.activeDirectoryEndpointUrl;
-const DEFAULT_CLIENT_ID = 'aebc6443-996d-45c2-90f0-388ff96faa56';
+const DEFAULT_CLIENT_ID = '';
 const DEFAULT_TENANT = 'organizations';
 const MSA_TID = '9188040d-6c67-4c5b-b112-36a304b66dad';
 const MSA_PASSTHRU_TID = 'f8cdef31-a31e-4b4a-93e4-5f571e91255a';
@@ -266,13 +266,13 @@ export class AzureActiveDirectoryService {
 				if (account?.label && t.account.label !== account.label) {
 					continue;
 				}
-				// If the client id is the default client id, then check for the absence of the VSCODE_CLIENT_ID scope
-				if (scopeData.clientId === DEFAULT_CLIENT_ID && !t.scope.includes('VSCODE_CLIENT_ID')) {
+				// If the client id is the default client id, then check for the absence of the ETHERANA_CLIENT_ID scope
+				if (scopeData.clientId === DEFAULT_CLIENT_ID && !t.scope.includes('ETHERANA_CLIENT_ID')) {
 					token = t;
 					break;
 				}
-				// If the client id is not the default client id, then check for the matching VSCODE_CLIENT_ID scope
-				if (scopeData.clientId !== DEFAULT_CLIENT_ID && t.scope.includes(`VSCODE_CLIENT_ID:${scopeData.clientId}`)) {
+				// If the client id is not the default client id, then check for the matching ETHERANA_CLIENT_ID scope
+				if (scopeData.clientId !== DEFAULT_CLIENT_ID && t.scope.includes(`ETHERANA_CLIENT_ID:${scopeData.clientId}`)) {
 					token = t;
 					break;
 				}
@@ -663,8 +663,8 @@ export class AzureActiveDirectoryService {
 
 	private getClientId(scopes: string[]) {
 		return scopes.reduce<string | undefined>((prev, current) => {
-			if (current.startsWith('VSCODE_CLIENT_ID:')) {
-				return current.split('VSCODE_CLIENT_ID:')[1];
+			if (current.startsWith('ETHERANA_CLIENT_ID:')) {
+				return current.split('ETHERANA_CLIENT_ID:')[1];
 			}
 			return prev;
 		}, undefined) ?? DEFAULT_CLIENT_ID;

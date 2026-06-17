@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-const DEFAULT_CLIENT_ID = 'aebc6443-996d-45c2-90f0-388ff96faa56';
+const DEFAULT_CLIENT_ID = '';
 const DEFAULT_TENANT = 'organizations';
 
 const OIDC_SCOPES = ['openid', 'email', 'profile', 'offline_access'];
@@ -13,7 +13,7 @@ export class ScopeData {
 	/**
 	 * The full list of scopes including:
 	 * * the original scopes passed to the constructor
-	 * * internal VS Code scopes (e.g. `VSCODE_CLIENT_ID:...`)
+	 * * internal Etherana scopes (e.g. `ETHERANA_CLIENT_ID:...`)
 	 * * the default scopes (`openid`, `email`, `profile`, `offline_access`)
 	 */
 	readonly allScopes: string[];
@@ -24,12 +24,12 @@ export class ScopeData {
 	readonly scopeStr: string;
 
 	/**
-	 * The list of scopes to send to the token endpoint. This is the same as `scopes` but without the internal VS Code scopes.
+	 * The list of scopes to send to the token endpoint. This is the same as `scopes` but without the internal Etherana scopes.
 	 */
 	readonly scopesToSend: string[];
 
 	/**
-	 * The client ID to use for the token request. This is the value of the `VSCODE_CLIENT_ID:...` scope if present, otherwise the default client ID.
+	 * The client ID to use for the token request. This is the value of the `ETHERANA_CLIENT_ID:...` scope if present, otherwise the disabled default client ID.
 	 */
 	readonly clientId: string;
 
@@ -56,8 +56,8 @@ export class ScopeData {
 
 	private getClientId(scopes: string[]): string {
 		return scopes.reduce<string | undefined>((prev, current) => {
-			if (current.startsWith('VSCODE_CLIENT_ID:')) {
-				return current.split('VSCODE_CLIENT_ID:')[1];
+			if (current.startsWith('ETHERANA_CLIENT_ID:')) {
+				return current.split('ETHERANA_CLIENT_ID:')[1];
 			}
 			return prev;
 		}, undefined) ?? DEFAULT_CLIENT_ID;

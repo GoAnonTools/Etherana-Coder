@@ -10,7 +10,7 @@ import { UriHandlerLoopbackClient } from '../common/loopbackClientAndOpener';
 import { UriEventHandler } from '../UriEventHandler';
 import { loopbackTemplate } from './loopbackTemplate';
 
-const redirectUri = 'https://vscode.dev/redirect';
+const redirectUri = '';
 
 export const enum ExtensionHost {
 	WebWorker,

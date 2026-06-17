@@ -15,7 +15,7 @@ import { BetterTokenStorage } from '../betterSecretStorage';
 import { IStoredSession } from '../AADHelper';
 import { ExtensionHost, getMsalFlows } from './flows';
 
-const redirectUri = 'https://vscode.dev/redirect';
+const redirectUri = '';
 const MSA_TID = '9188040d-6c67-4c5b-b112-36a304b66dad';
 const MSA_PASSTHRU_TID = 'f8cdef31-a31e-4b4a-93e4-5f571e91255a';
 

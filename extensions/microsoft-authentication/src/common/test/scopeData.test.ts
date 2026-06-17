@@ -32,18 +32,18 @@ suite('ScopeData', () => {
 		assert.deepStrictEqual(scopeData.scopesToSend, ['email', 'offline_access', 'openid', 'profile', 'User.Read']);
 	});
 
-	test('should filter out internal VS Code scopes for scopesToSend', () => {
-		const scopeData = new ScopeData(['custom_scope', 'VSCODE_CLIENT_ID:some_id']);
+	test('should filter out internal Etherana scopes for scopesToSend', () => {
+		const scopeData = new ScopeData(['custom_scope', 'ETHERANA_CLIENT_ID:some_id']);
 		assert.deepStrictEqual(scopeData.scopesToSend, ['custom_scope']);
 	});
 
-	test('should use the default client ID if no VSCODE_CLIENT_ID scope is present', () => {
+	test('should use the disabled default client ID if no ETHERANA_CLIENT_ID scope is present', () => {
 		const scopeData = new ScopeData(['custom_scope']);
-		assert.strictEqual(scopeData.clientId, 'aebc6443-996d-45c2-90f0-388ff96faa56');
+		assert.strictEqual(scopeData.clientId, '');
 	});
 
-	test('should use the VSCODE_CLIENT_ID scope if present', () => {
-		const scopeData = new ScopeData(['custom_scope', 'VSCODE_CLIENT_ID:some_id']);
+	test('should use the ETHERANA_CLIENT_ID scope if present', () => {
+		const scopeData = new ScopeData(['custom_scope', 'ETHERANA_CLIENT_ID:some_id']);
 		assert.strictEqual(scopeData.clientId, 'some_id');
 	});
 
