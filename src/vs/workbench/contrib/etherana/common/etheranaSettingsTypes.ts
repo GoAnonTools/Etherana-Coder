@@ -246,17 +246,13 @@ const defaultCustomSettings: Record<CustomSettingName, undefined> = {
 }
 
 
-const modelInfoOfDefaultModelNames = (defaultModelNames: string[]): { models: EtheranaStatefulModelInfo[] } => {
-	return {
-		models: defaultModelNames.map((modelName, i) => ({
-			modelName,
-			type: 'default',
-			isHidden: defaultModelNames.length >= 10, // hide all models if there are a ton of them, and make user enable them individually
-		}))
-	}
+const modelInfoOfDefaultModelNames = (_defaultModelNames: string[]): { models: EtheranaStatefulModelInfo[] } => {
+	// Etherana Coder: do not prefill stale packaged model catalogs.
+	// AI model IDs change quickly; users should add the exact current model ID from their provider.
+	return { models: [] };
 }
 
-// used when waiting and for a type reference
+
 export const defaultSettingsOfProvider: SettingsOfProvider = {
 	anthropic: {
 		...defaultCustomSettings,

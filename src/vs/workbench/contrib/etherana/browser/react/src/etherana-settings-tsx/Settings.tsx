@@ -324,10 +324,10 @@ const SimpleModelSettingsDialog = ({
 
 				{/* Display model recognition status */}
 				<div className="text-sm text-etherana-fg-3 mb-4">
-					{type === 'default' ? `${modelName} comes packaged with Etherana, so you shouldn't need to change these settings.`
+					{type === 'default' ? `${modelName} is an older default entry. Prefer adding the exact current model ID from your provider.`
 						: isUnrecognizedModel
 							? `Model not recognized by Etherana.`
-							: `Etherana recognizes ${modelName} ("${recognizedModelName}").`}
+							: `Etherana detected ${modelName} locally${recognizedModelName ? ` (recognized as ${recognizedModelName})` : ''}.`}
 				</div>
 
 
@@ -401,8 +401,11 @@ export const ModelDump = ({ filteredProviders }: { filteredProviders?: ProviderN
 
 	for (let providerName of providersToShow) {
 		const providerSettings = settingsState.settingsOfProvider[providerName]
-		// if (!providerSettings.enabled) continue
-		modelDump.push(...providerSettings.models.map(model => ({ ...model, providerName, providerEnabled: !!providerSettings._didFillInProviderSettings })))
+		// Show only user-added and locally autodetected models.
+		// Default packaged model lists get stale quickly and should not be the main UX.
+		modelDump.push(...providerSettings.models
+			.filter(model => model.type !== 'default')
+			.map(model => ({ ...model, providerName, providerEnabled: !!providerSettings._didFillInProviderSettings })))
 	}
 
 	// sort by hidden
@@ -417,7 +420,7 @@ export const ModelDump = ({ filteredProviders }: { filteredProviders?: ProviderN
 			return;
 		}
 		if (!modelName) {
-			setErrorString('Please enter a model name.');
+			setErrorString('Please enter the exact model ID shown by your provider.');
 			return;
 		}
 
@@ -557,7 +560,7 @@ export const ModelDump = ({ filteredProviders }: { filteredProviders?: ProviderN
 							value={modelName}
 							compact={true}
 							onChangeValue={setModelName}
-							placeholder='Model Name'
+							placeholder='Exact model ID from provider'
 							className='max-w-32'
 						/>
 					</ErrorBoundary>
@@ -599,7 +602,7 @@ export const ModelDump = ({ filteredProviders }: { filteredProviders?: ProviderN
 			>
 				<div className="flex items-center gap-1">
 					<Plus size={16} />
-					<span>Add a model</span>
+					<span>Add exact model ID</span>
 				</div>
 			</div>
 		)}
@@ -1373,6 +1376,9 @@ export const Settings = () => {
 							<div className={shouldShowTab('models') ? `` : 'hidden'}>
 								<ErrorBoundary>
 									<h2 className={`text-3xl mb-2`}>Models</h2>
+									<p className="text-sm text-etherana-fg-3 mb-4">
+										Model names change often. Add the exact model ID shown by your provider, or use local autodetection for supported local providers.
+									</p>
 									<ModelDump />
 									<div className='w-full h-[1px] my-4' />
 									<AutoDetectLocalModelsToggle />

@@ -113,11 +113,16 @@ const providerNamesOfTab: Record<TabName, ProviderName[]> = {
 
 const descriptionOfTab: Record<TabName, string> = {
 	Free: `Optional cloud providers with a free tier. You can add these later.`,
-	Paid: `Optional paid cloud providers. Bring your own key if you want to use them.`,
+	Paid: `Freemium and paid cloud APIs. Bring your own key; free tiers and limits depend on the provider.`,
 	Local: `Recommended for privacy-first use. Local providers can be configured now or later.`,
 	'Cloud/Other': `Optional advanced providers and OpenAI-compatible endpoints. You can configure these later.`,
 };
 
+
+const displayNameOfProviderTab = (tab: TabName | 'Cloud/Other'): string => {
+	if (tab === 'Paid') return 'Freemium / Paid';
+	return tab;
+};
 
 const featureNameMap: { display: string, featureName: FeatureName }[] = [
 	{ display: 'Chat', featureName: 'Chat' },
@@ -198,7 +203,7 @@ const AddProvidersPage = ({ pageIndex, setPageIndex }: { pageIndex: number, setP
 							setErrorMessage(null); // Reset error message when changing tabs
 						}}
 					>
-						{tab}
+						{displayNameOfProviderTab(tab as TabName | 'Cloud/Other')}
 					</button>
 				))}
 			</div>
