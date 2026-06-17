@@ -430,7 +430,7 @@ function getArgvConfigPath(): string {
 
 function configureCrashReporter(): void {
 	let crashReporterDirectory = args['crash-reporter-directory'];
-	let submitURL = '';
+
 	if (crashReporterDirectory) {
 		crashReporterDirectory = path.normalize(crashReporterDirectory);
 
@@ -448,73 +448,20 @@ function configureCrashReporter(): void {
 			}
 		}
 
-		// Crashes are stored in the crashDumps directory by default, so we
-		// need to change that directory to the provided one
 		console.log(`Found --crash-reporter-directory argument. Setting crashDumps directory to be '${crashReporterDirectory}'`);
 		app.setPath('crashDumps', crashReporterDirectory);
 	}
 
-	// Otherwise we configure the crash reporter from product.json
-	else {
-		const appCenter = product.appCenter;
-		if (appCenter) {
-			const isWindows = (process.platform === 'win32');
-			const isLinux = (process.platform === 'linux');
-			const isDarwin = (process.platform === 'darwin');
-			const crashReporterId = argvConfig['crash-reporter-id'];
-			const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-			if (crashReporterId && uuidPattern.test(crashReporterId)) {
-				if (isWindows) {
-					switch (process.arch) {
-						case 'x64':
-							submitURL = appCenter['win32-x64'];
-							break;
-						case 'arm64':
-							submitURL = appCenter['win32-arm64'];
-							break;
-					}
-				} else if (isDarwin) {
-					if (product.darwinUniversalAssetId) {
-						submitURL = appCenter['darwin-universal'];
-					} else {
-						switch (process.arch) {
-							case 'x64':
-								submitURL = appCenter['darwin'];
-								break;
-							case 'arm64':
-								submitURL = appCenter['darwin-arm64'];
-								break;
-						}
-					}
-				} else if (isLinux) {
-					submitURL = appCenter['linux-x64'];
-				}
-				submitURL = submitURL.concat('&uid=', crashReporterId, '&iid=', crashReporterId, '&sid=', crashReporterId);
-				// Send the id for child node process that are explicitly starting crash reporter.
-				// For vscode this is ExtensionHost process currently.
-				const argv = process.argv;
-				const endOfArgsMarkerIndex = argv.indexOf('--');
-				if (endOfArgsMarkerIndex === -1) {
-					argv.push('--crash-reporter-id', crashReporterId);
-				} else {
-					// if the we have an argument "--" (end of argument marker)
-					// we cannot add arguments at the end. rather, we add
-					// arguments before the "--" marker.
-					argv.splice(endOfArgsMarkerIndex, 0, '--crash-reporter-id', crashReporterId);
-				}
-			}
-		}
-	}
-
-	// Start crash reporter for all processes
+	// Etherana Coder privacy-first hardening:
+	// keep Electron crash dump support local-only and never upload crash reports.
 	const productName = (product.crashReporter ? product.crashReporter.productName : undefined) || product.nameShort;
-	const companyName = (product.crashReporter ? product.crashReporter.companyName : undefined) || 'Microsoft';
-	const uploadToServer = Boolean(!process.env['VSCODE_DEV'] && submitURL && !crashReporterDirectory);
+	const companyName = (product.crashReporter ? product.crashReporter.companyName : undefined) || 'Etherana';
+
 	crashReporter.start({
 		companyName,
 		productName: process.env['VSCODE_DEV'] ? `${productName} Dev` : productName,
-		submitURL,
-		uploadToServer,
+		submitURL: '',
+		uploadToServer: false,
 		compress: true
 	});
 }
