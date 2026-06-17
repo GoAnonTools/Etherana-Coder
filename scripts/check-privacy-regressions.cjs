@@ -90,6 +90,19 @@ const forbiddenChecks = [
     ],
   },
   {
+    name: 'Rust CLI Microsoft-routed OAuth identifiers',
+    roots: ['cli/src'],
+    include: file => file.endsWith('.rs'),
+    patterns: [
+      /aebc6443-996d-45c2-90f0-388ff96faa56/,
+      /01ab8ac9400c4e429b23/,
+      /PROD_FIRST_PARTY_APP_ID/,
+      /login\.microsoftonline\.com\/organizations\/oauth2\/v2\.0\/(devicecode|token)/,
+      /github\.com\/login\/device\/code/,
+      /github\.com\/login\/oauth\/access_token/,
+    ],
+  },
+  {
     name: 'Microsoft-routed OAuth identifiers',
     roots: [
       'extensions/github-authentication/src',

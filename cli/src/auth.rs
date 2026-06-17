@@ -23,10 +23,7 @@ use gethostname::gethostname;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::{cell::Cell, fmt::Display, path::PathBuf, sync::Arc, thread};
 use tokio::time::sleep;
-use tunnels::{
-	contracts::PROD_FIRST_PARTY_APP_ID,
-	management::{Authorization, AuthorizationProvider, HttpError},
-};
+use tunnels::management::{Authorization, AuthorizationProvider, HttpError};
 
 #[derive(Deserialize)]
 struct DeviceCodeResponse {
@@ -67,40 +64,33 @@ impl Display for AuthProvider {
 
 impl AuthProvider {
 	pub fn client_id(&self) -> &'static str {
+		// Etherana Coder privacy-first: built-in Microsoft/GitHub device-code OAuth is disabled.
 		match self {
-			AuthProvider::Microsoft => "aebc6443-996d-45c2-90f0-388ff96faa56",
-			AuthProvider::Github => "01ab8ac9400c4e429b23",
+			AuthProvider::Microsoft | AuthProvider::Github => "",
 		}
 	}
 
 	pub fn code_uri(&self) -> &'static str {
+		// Etherana Coder privacy-first: do not route CLI auth through Microsoft or GitHub OAuth endpoints.
 		match self {
-			AuthProvider::Microsoft => {
-				"https://login.microsoftonline.com/organizations/oauth2/v2.0/devicecode"
-			}
-			AuthProvider::Github => "https://github.com/login/device/code",
+			AuthProvider::Microsoft | AuthProvider::Github => "",
 		}
 	}
 
 	pub fn grant_uri(&self) -> &'static str {
+		// Etherana Coder privacy-first: do not route CLI auth through Microsoft or GitHub OAuth endpoints.
 		match self {
-			AuthProvider::Microsoft => {
-				"https://login.microsoftonline.com/organizations/oauth2/v2.0/token"
-			}
-			AuthProvider::Github => "https://github.com/login/oauth/access_token",
+			AuthProvider::Microsoft | AuthProvider::Github => "",
 		}
 	}
 
 	pub fn get_default_scopes(&self) -> String {
+		// Etherana Coder privacy-first: no bundled first-party OAuth scopes.
 		match self {
-			AuthProvider::Microsoft => {
-				format!("{PROD_FIRST_PARTY_APP_ID}/.default+offline_access+profile+openid")
-			}
-			AuthProvider::Github => "read:user+read:org".to_string(),
+			AuthProvider::Microsoft | AuthProvider::Github => String::new(),
 		}
 	}
 }
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct StoredCredential {
 	#[serde(rename = "p")]
