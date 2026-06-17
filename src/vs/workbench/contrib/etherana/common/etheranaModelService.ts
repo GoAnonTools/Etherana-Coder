@@ -43,6 +43,10 @@ class EtheranaModelService extends Disposable implements IEtheranaModelService {
 
 	initializeModel = async (uri: URI) => {
 		try {
+			// Etherana Coder: ignore pseudo-resources created by workbench UI controls.
+			// Example: the Extensions search input uses extensions:searchinput and is not a file model.
+			if (uri.scheme === 'extensions') return;
+
 			if (uri.fsPath in this._modelRefOfURI) return;
 			const editorModelRef = await this._textModelService.createModelReference(uri);
 			// Keep a strong reference to prevent disposal
