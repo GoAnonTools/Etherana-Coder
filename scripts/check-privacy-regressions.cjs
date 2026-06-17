@@ -47,6 +47,23 @@ const forbiddenChecks = [
     ],
   },
   {
+    name: 'core 1DS telemetry re-enable triggers',
+    roots: [
+      'product.json',
+      'src/vs/server/node/serverServices.ts',
+      'src/vs/code/node/cliProcessMain.ts',
+      'src/vs/code/electron-utility/sharedProcess/sharedProcessMain.ts',
+      'src/vs/code/electron-main/app.ts',
+    ],
+    include: () => true,
+    patterns: [
+      /"aiConfig"\s*:/,
+      /new\s+OneDataSystemAppender\s*\(/,
+      /productService\.aiConfig/,
+      /ariaKey/,
+    ],
+  },
+  {
     name: 'Microsoft-routed OAuth identifiers',
     roots: [
       'extensions/github-authentication/src',
