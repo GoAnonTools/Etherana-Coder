@@ -128,7 +128,7 @@ export interface IGitHubAssetOptions {
  */
 export function fetchGithub(repo: string, options: IGitHubAssetOptions): Stream {
 	return fetchUrls(`/repos/${repo.replace(/^\/|\/$/g, '')}/releases/tags/v${options.version}`, {
-		base: 'https://api.github.com',
+		base: process.env.ETHERANA_GITHUB_API_BASE,
 		verbose: options.verbose,
 		nodeFetchOptions: { headers: ghApiHeaders }
 	}).pipe(through2.obj(async function (file, _enc, callback) {

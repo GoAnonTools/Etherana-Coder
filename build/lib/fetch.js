@@ -117,7 +117,7 @@ const ghDownloadHeaders = {
  */
 function fetchGithub(repo, options) {
     return fetchUrls(`/repos/${repo.replace(/^\/|\/$/g, '')}/releases/tags/v${options.version}`, {
-        base: 'https://api.github.com',
+        base: process.env.ETHERANA_GITHUB_API_BASE,
         verbose: options.verbose,
         nodeFetchOptions: { headers: ghApiHeaders }
     }).pipe(through2_1.default.obj(async function (file, _enc, callback) {

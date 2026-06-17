@@ -244,7 +244,6 @@ const userAgent = 'VSCode Build';
 const baseHeaders = {
     'X-Market-Client-Id': 'VSCode Build',
     'User-Agent': userAgent,
-    'X-Market-User-Id': '291C1CD0-051A-4123-9B4B-30D60EF52EE2',
 };
 function fromMarketplace(serviceUrl, { name: extensionName, version, sha256, metadata }) {
     const json = require('gulp-json-editor');
