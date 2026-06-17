@@ -33,6 +33,25 @@ const forbiddenChecks = [
     ],
   },
   {
+    name: 'built-in extension telemetry re-enable triggers',
+    roots: [
+      'extensions/github/src',
+      'extensions/git/src',
+      'extensions/merge-conflict/src',
+      'extensions/markdown-language-features/src',
+    ],
+    include: file => file.endsWith('.ts'),
+    patterns: [
+      /from\s+['"]@vscode\/extension-telemetry['"]/,
+      /require\(['"]@vscode\/extension-telemetry['"]\)/,
+      /new\s+TelemetryReporter\s*\([^)]*aiKey/,
+      /new\s+VSCodeTelemetryReporter\s*\(/,
+      /packageJSON\.aiKey/,
+      /extension\.packageJSON\.aiKey/,
+      /context\.extension\.packageJSON[^\n]*aiKey/,
+    ],
+  },
+  {
     name: 'TAS experimentation runtime calls',
     roots: [
       'extensions/typescript-language-features/src',
