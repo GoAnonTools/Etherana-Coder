@@ -264,14 +264,9 @@
       "node-addon-api": "7.1.0"
     }
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/etherana/etherana-coder.git"
-  },
-  "bugs": {
-    "url": "https://github.com/etherana/etherana-coder/issues"
-  },
   "optionalDependencies": {
     "windows-foreground-love": "0.5.0"
-  }
+  },
+  "description": "Privacy-first AI coding workspace for local-first development.",
+  "homepage": "https://goanon.pro"
 }
