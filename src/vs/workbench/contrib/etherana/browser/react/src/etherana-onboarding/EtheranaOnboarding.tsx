@@ -6,9 +6,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAccessor, useIsDark, useSettingsState } from '../util/services.js';
 import { Brain, Check, ChevronRight, DollarSign, ExternalLink, Lock, X } from 'lucide-react';
-import { displayInfoOfProviderName, ProviderName, providerNames, localProviderNames, featureNames, FeatureName, isFeatureNameDisabled } from '../../../../common/etheranaSettingsTypes.js';
+import { displayInfoOfProviderName, ProviderName, providerNames, localProviderNames, featureNames, FeatureName } from '../../../../common/etheranaSettingsTypes.js';
 import { ChatMarkdownRender } from '../markdown/ChatMarkdownRender.js';
-import { OllamaSetupInstructions, OneClickSwitchButton, SettingsForProvider, ModelDump } from '../etherana-settings-tsx/Settings.js';
+import { OllamaSetupInstructions, OneClickSwitchButton, SettingsForProvider } from '../etherana-settings-tsx/Settings.js';
 import { EtheranaButtonBgDarken } from '../util/inputs.js';
 import { ColorScheme } from '../../../../../../../platform/theme/common/theme.js';
 import ErrorBoundary from '../sidebar-tsx/ErrorBoundary.js';
@@ -127,10 +127,41 @@ const featureNameMap: { display: string, featureName: FeatureName }[] = [
 	{ display: 'Source Control', featureName: 'SCM' },
 ];
 
+const placeholderModelNameOfProvider = (providerName: ProviderName): string => {
+	if (providerName === 'ollama') return 'model-from-ollama-list';
+	if (providerName === 'lmStudio') return 'model-id-from-lm-studio';
+	if (providerName === 'openRouter') return 'provider/model-id';
+	if (providerName === 'openAICompatible') return 'model-id-from-your-server';
+	return 'exact-model-id-from-provider';
+};
+
 const AddProvidersPage = ({ pageIndex, setPageIndex }: { pageIndex: number, setPageIndex: (index: number) => void }) => {
+	const accessor = useAccessor()
+	const settingsStateService = accessor.get('IEtheranaSettingsService')
 	const [currentTab, setCurrentTab] = useState<TabName>('Local');
 	const settingsState = useSettingsState();
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const [manualModelNames, setManualModelNames] = useState<Partial<Record<ProviderName, string>>>({});
+	const [manualModelMessages, setManualModelMessages] = useState<Partial<Record<ProviderName, string>>>({});
+
+	const addManualModel = (providerName: ProviderName) => {
+		const modelName = manualModelNames[providerName]?.trim();
+
+		if (!modelName) {
+			setManualModelMessages(prev => ({ ...prev, [providerName]: 'Enter the exact model ID shown by your provider.' }));
+			return;
+		}
+
+		if (settingsState.settingsOfProvider[providerName].models.find(model => model.modelName === modelName)) {
+			setManualModelMessages(prev => ({ ...prev, [providerName]: 'This model is already added.' }));
+			return;
+		}
+
+		settingsStateService.addModel(providerName, modelName);
+		setManualModelNames(prev => ({ ...prev, [providerName]: '' }));
+		setManualModelMessages(prev => ({ ...prev, [providerName]: `Added ${modelName}. You can change this later in Settings.` }));
+	};
+
 
 	// Clear error message after 5 seconds
 	useEffect(() => {
@@ -150,9 +181,9 @@ const AddProvidersPage = ({ pageIndex, setPageIndex }: { pageIndex: number, setP
 		};
 	}, [errorMessage]);
 
-	return (<div className="flex flex-col md:flex-row w-full h-[80vh] gap-6 max-w-[900px] mx-auto relative">
+	return (<div className="flex flex-col md:flex-row w-full max-h-[72vh] overflow-y-auto gap-6 max-w-[900px] mx-auto relative pr-2">
 		{/* Left Column */}
-		<div className="md:w-1/4 w-full flex flex-col gap-6 p-6 border-none border-etherana-border-2 h-full overflow-y-auto">
+		<div className="md:w-1/4 w-full flex flex-col gap-6 p-6 border-none border-etherana-border-2 md:sticky md:top-0 md:self-start bg-etherana-bg-1/95">
 			{/* Tab Selector */}
 			<div className="flex md:flex-col gap-2">
 				{[...tabNames, 'Cloud/Other'].map(tab => (
@@ -193,11 +224,11 @@ const AddProvidersPage = ({ pageIndex, setPageIndex }: { pageIndex: number, setP
 		</div>
 
 		{/* Right Column */}
-		<div className="flex-1 flex flex-col items-center justify-start p-6 h-full overflow-y-auto">
-			<div className="text-5xl mb-2 text-center w-full">Add a Provider</div>
+		<div className="flex-1 flex flex-col items-center justify-start p-6 min-h-0">
+			<div className="text-3xl mb-2 text-center w-full">Add a Provider</div>
 
 			<div className="w-full max-w-xl mt-4 mb-10">
-				<div className="text-4xl font-light my-4 w-full">{currentTab}</div>
+				<div className="text-2xl font-light my-4 w-full">{currentTab}</div>
 				<div className="text-sm opacity-80 text-etherana-fg-3 my-4 w-full">{descriptionOfTab[currentTab]}</div>
 
 				<div className="flex flex-col sm:flex-row gap-2 mt-6">
@@ -225,7 +256,7 @@ const AddProvidersPage = ({ pageIndex, setPageIndex }: { pageIndex: number, setP
 			{providerNamesOfTab[currentTab].map((providerName) => (
 				<div key={providerName} className="w-full max-w-xl mb-10">
 					<div className="text-xl mb-2">
-						Add {displayInfoOfProviderName(providerName).title}
+						Configure {displayInfoOfProviderName(providerName).title}
 						{providerName === 'gemini' && (
 							<span
 								data-tooltip-id="etherana-tooltip-provider-info"
@@ -244,43 +275,53 @@ const AddProvidersPage = ({ pageIndex, setPageIndex }: { pageIndex: number, setP
 						)}
 					</div>
 					<div>
-						<SettingsForProvider providerName={providerName} showProviderTitle={false} showProviderSuggestions={true} />
-						{(providerName === 'gemini' || providerName === 'anthropic' || providerName === 'openRouter' || providerName === 'ollama') && (
-							<div className="mt-4 p-4 rounded bg-[#0e70c0]/10 border border-[#0e70c0]/20">
-								<h5 className="text-sm font-medium mb-2">Quick Setup</h5>
-								<p className="text-xs opacity-70 mb-3">Get running in seconds with a guided setup.</p>
+						<div className="text-xs opacity-70 mb-3">
+							Add your API key or endpoint here if this provider needs one. Then enter the exact model ID from your provider below.
+						</div>
+						<SettingsForProvider providerName={providerName} showProviderTitle={false} showProviderSuggestions={false} />
+
+						<div className="mt-4 p-4 rounded bg-etherana-bg-2/50 border border-etherana-border-4">
+							<div className="text-sm font-medium mb-2">Model ID</div>
+							<p className="text-xs opacity-70 mb-3">
+								Model names change often. Use the exact model ID shown by your provider. You can edit it later in Settings.
+							</p>
+							<div className="flex flex-col sm:flex-row gap-2">
+								<input
+									className="w-full rounded-md border border-etherana-border-4 bg-etherana-bg-1 px-3 py-2 text-sm text-etherana-fg-1"
+									value={manualModelNames[providerName] ?? ''}
+									placeholder={placeholderModelNameOfProvider(providerName)}
+									onChange={(event) => {
+										setManualModelNames(prev => ({ ...prev, [providerName]: event.target.value }));
+										setManualModelMessages(prev => ({ ...prev, [providerName]: '' }));
+									}}
+									onKeyDown={(event) => {
+										if (event.key === 'Enter') {
+											addManualModel(providerName);
+										}
+									}}
+								/>
 								<EtheranaButtonBgDarken
-									className="text-xs px-3 py-1 bg-[#0e70c0] text-white"
-									onClick={() => {/* Trigger Quick Setup Modal */ }}
+									className="text-sm px-3 py-2 bg-[#0e70c0] text-white"
+									onClick={() => addManualModel(providerName)}
 								>
-									Launch Quick Setup
+									Add model
 								</EtheranaButtonBgDarken>
 							</div>
-						)}
+							{manualModelMessages[providerName] && (
+								<div className="text-xs opacity-80 mt-2">{manualModelMessages[providerName]}</div>
+							)}
+						</div>
 					</div>
 					{providerName === 'ollama' && <OllamaSetupInstructions />}
 				</div>
 			))}
 
-			{(currentTab === 'Local' || currentTab === 'Cloud/Other') && (
-				<div className="w-full max-w-xl mt-8 bg-etherana-bg-2/50 rounded-lg p-6 border border-etherana-border-4">
-					<div className="flex items-center gap-2 mb-4">
-						<div className="text-xl font-medium">Models</div>
-					</div>
 
-					{currentTab === 'Local' && (
-						<div className="text-sm opacity-80 text-etherana-fg-3 my-4 w-full">Local models should be detected automatically. You can add custom models below.</div>
-					)}
-
-					{currentTab === 'Local' && <ModelDump filteredProviders={localProviderNames} />}
-					{currentTab === 'Cloud/Other' && <ModelDump filteredProviders={cloudProviders} />}
-				</div>
-			)}
 
 
 
 			{/* Navigation buttons in right column */}
-			<div className="flex flex-col items-end w-full mt-auto pt-8">
+			<div className="sticky bottom-0 flex flex-col items-end w-full mt-auto pt-4 pb-2 bg-etherana-bg-1/95 backdrop-blur border-t border-etherana-border-4">
 				{errorMessage && (
 					<div className="text-amber-400 mb-2 text-sm opacity-80 transition-opacity duration-300">{errorMessage}</div>
 				)}
@@ -622,7 +663,7 @@ const EtheranaOnboardingContent = () => {
 		0: <OnboardingPageShell
 			content={
 				<div className='flex flex-col items-center gap-8'>
-					<div className="text-5xl font-light text-center">Welcome to Etherana Coder</div>
+					<div className="text-3xl font-light text-center">Welcome to Etherana Coder</div>
 
 					{/* Slice of Etherana image */}
 					<div className='max-w-md w-full h-[30vh] mx-auto flex items-center justify-center'>
@@ -653,7 +694,7 @@ const EtheranaOnboardingContent = () => {
 
 			content={
 				<div>
-					<div className="text-5xl font-light text-center">Settings and Themes</div>
+					<div className="text-3xl font-light text-center">Settings and Themes</div>
 
 					<div className="mt-8 text-center flex flex-col items-center gap-4 w-full max-w-md mx-auto">
 						<h4 className="text-etherana-fg-3 mb-4">Transfer your settings from an existing editor?</h4>
@@ -668,7 +709,7 @@ const EtheranaOnboardingContent = () => {
 	}
 
 
-	return <div key={pageIndex} className="w-full h-[80vh] text-left mx-auto flex flex-col items-center justify-center">
+	return <div key={pageIndex} className="w-full max-h-[82vh] overflow-y-auto text-left mx-auto flex flex-col items-center justify-start py-4">
 		<ErrorBoundary>
 			{contentOfIdx[pageIndex]}
 		</ErrorBoundary>
