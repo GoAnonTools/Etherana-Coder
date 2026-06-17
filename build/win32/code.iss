@@ -43,7 +43,6 @@ WizardStyle=modern
 CloseApplications=force
 
 #ifdef Sign
-SignTool=esrp
 #endif
 
 #if "user" == InstallTarget

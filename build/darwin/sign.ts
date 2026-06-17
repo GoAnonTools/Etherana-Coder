@@ -43,8 +43,8 @@ async function main(buildDir?: string): Promise<void> {
 	const defaultOpts: codesign.SignOptions = {
 		app: path.join(appRoot, appName),
 		platform: 'darwin',
-		entitlements: path.join(baseDir, 'azure-pipelines', 'darwin', 'app-entitlements.plist'),
-		'entitlements-inherit': path.join(baseDir, 'azure-pipelines', 'darwin', 'app-entitlements.plist'),
+		entitlements: path.join(baseDir, 'darwin', 'entitlements', 'app-entitlements.plist'),
+		'entitlements-inherit': path.join(baseDir, 'darwin', 'entitlements', 'app-entitlements.plist'),
 		hardenedRuntime: true,
 		'pre-auto-entitlements': false,
 		'pre-embed-provisioning-profile': false,
@@ -67,22 +67,22 @@ async function main(buildDir?: string): Promise<void> {
 	const gpuHelperOpts: codesign.SignOptions = {
 		...defaultOpts,
 		app: path.join(appFrameworkPath, gpuHelperAppName),
-		entitlements: path.join(baseDir, 'azure-pipelines', 'darwin', 'helper-gpu-entitlements.plist'),
-		'entitlements-inherit': path.join(baseDir, 'azure-pipelines', 'darwin', 'helper-gpu-entitlements.plist'),
+		entitlements: path.join(baseDir, 'darwin', 'entitlements', 'helper-gpu-entitlements.plist'),
+		'entitlements-inherit': path.join(baseDir, 'darwin', 'entitlements', 'helper-gpu-entitlements.plist'),
 	};
 
 	const rendererHelperOpts: codesign.SignOptions = {
 		...defaultOpts,
 		app: path.join(appFrameworkPath, rendererHelperAppName),
-		entitlements: path.join(baseDir, 'azure-pipelines', 'darwin', 'helper-renderer-entitlements.plist'),
-		'entitlements-inherit': path.join(baseDir, 'azure-pipelines', 'darwin', 'helper-renderer-entitlements.plist'),
+		entitlements: path.join(baseDir, 'darwin', 'entitlements', 'helper-renderer-entitlements.plist'),
+		'entitlements-inherit': path.join(baseDir, 'darwin', 'entitlements', 'helper-renderer-entitlements.plist'),
 	};
 
 	const pluginHelperOpts: codesign.SignOptions = {
 		...defaultOpts,
 		app: path.join(appFrameworkPath, pluginHelperAppName),
-		entitlements: path.join(baseDir, 'azure-pipelines', 'darwin', 'helper-plugin-entitlements.plist'),
-		'entitlements-inherit': path.join(baseDir, 'azure-pipelines', 'darwin', 'helper-plugin-entitlements.plist'),
+		entitlements: path.join(baseDir, 'darwin', 'entitlements', 'helper-plugin-entitlements.plist'),
+		'entitlements-inherit': path.join(baseDir, 'darwin', 'entitlements', 'helper-plugin-entitlements.plist'),
 	};
 
 	// Only overwrite plist entries for x64 and arm64 builds,
