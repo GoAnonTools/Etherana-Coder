@@ -8,7 +8,7 @@ import { Repository as GitHubRepository, RepositoryRuleset } from '@octokit/grap
 import { AuthenticationError, getOctokitGraphql } from './auth';
 import { API, BranchProtection, BranchProtectionProvider, BranchProtectionRule, Repository } from './typings/git';
 import { DisposableStore, getRepositoryFromUrl } from './util';
-import TelemetryReporter from '@vscode/extension-telemetry';
+import TelemetryReporter from './telemetryReporter';
 
 const REPOSITORY_QUERY = `
 	query repositoryPermissions($owner: String!, $repo: String!) {

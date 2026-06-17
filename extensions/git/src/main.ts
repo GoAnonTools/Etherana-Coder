@@ -11,7 +11,7 @@ import { GitFileSystemProvider } from './fileSystemProvider';
 import { GitDecorations } from './decorationProvider';
 import { Askpass } from './askpass';
 import { toDisposable, filterEvent, eventToPromise } from './util';
-import TelemetryReporter from '@vscode/extension-telemetry';
+import TelemetryReporter from './telemetryReporter';
 import { GitExtension } from './api/git';
 import { GitProtocolHandler } from './protocolHandler';
 import { GitExtensionImpl } from './api/extension';
@@ -200,8 +200,7 @@ export async function _activate(context: ExtensionContext): Promise<GitExtension
 	disposables.push(logger.onDidChangeLogLevel(onDidChangeLogLevel));
 	onDidChangeLogLevel(logger.logLevel);
 
-	const { aiKey } = require('../package.json') as { aiKey: string };
-	const telemetryReporter = new TelemetryReporter(aiKey);
+	const telemetryReporter = new TelemetryReporter();
 	deactivateTasks.push(() => telemetryReporter.dispose());
 
 	const config = workspace.getConfiguration('git', null);
