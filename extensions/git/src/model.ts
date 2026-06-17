@@ -1102,7 +1102,7 @@ export class Model implements IRepositoryResolver, IBranchProtectionProviderRegi
 			commands.executeCommand('git.manageUnsafeRepositories');
 		} else if (choice === learnMore) {
 			// Learn More
-			commands.executeCommand('vscode.open', Uri.parse('https://aka.ms/vscode-git-unsafe-repository'));
+			commands.executeCommand('vscode.open', Uri.parse('https://git-scm.com/docs/git-config#Documentation/git-config.txt-safedirectory'));
 		}
 	}
 
