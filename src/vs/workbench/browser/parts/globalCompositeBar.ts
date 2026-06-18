@@ -53,7 +53,6 @@ export class GlobalCompositeBar extends Disposable {
 	readonly element: HTMLElement;
 
 	private readonly globalActivityAction = this._register(new Action(GLOBAL_ACTIVITY_ID));
-	private readonly accountAction = this._register(new Action(ACCOUNTS_ACTIVITY_ID));
 	private readonly globalActivityActionBar: ActionBar;
 
 	constructor(
@@ -102,10 +101,8 @@ export class GlobalCompositeBar extends Disposable {
 			preventLoopNavigation: true
 		}));
 
-		if (this.accountsVisibilityPreference) {
-			this.globalActivityActionBar.push(this.accountAction, { index: GlobalCompositeBar.ACCOUNTS_ACTION_INDEX });
-		}
-
+		// Etherana Coder: hide the upstream Accounts/profile entry point.
+		// Etherana is privacy-first and does not expose a first-party account system.
 		this.globalActivityActionBar.push(this.globalActivityAction);
 
 		this.registerListeners();
@@ -132,26 +129,15 @@ export class GlobalCompositeBar extends Disposable {
 	}
 
 	getContextMenuActions(): IAction[] {
-		return [toAction({ id: 'toggleAccountsVisibility', label: localize('accounts', "Accounts"), checked: this.accountsVisibilityPreference, run: () => this.accountsVisibilityPreference = !this.accountsVisibilityPreference })];
+		return [];
 	}
 
 	private toggleAccountsActivity() {
-		if (this.globalActivityActionBar.length() === 2 && this.accountsVisibilityPreference) {
-			return;
-		}
+		// Etherana Coder: keep the Accounts/profile entry point hidden even if
+		// stale profile storage says it should be visible.
 		if (this.globalActivityActionBar.length() === 2) {
 			this.globalActivityActionBar.pull(GlobalCompositeBar.ACCOUNTS_ACTION_INDEX);
-		} else {
-			this.globalActivityActionBar.push(this.accountAction, { index: GlobalCompositeBar.ACCOUNTS_ACTION_INDEX });
 		}
-	}
-
-	private get accountsVisibilityPreference(): boolean {
-		return isAccountsActionVisible(this.storageService);
-	}
-
-	private set accountsVisibilityPreference(value: boolean) {
-		setAccountsActionVisible(this.storageService, value);
 	}
 }
 
@@ -655,25 +641,16 @@ export class SimpleGlobalActivityActionViewItem extends GlobalActivityActionView
 	}
 }
 
-function simpleActivityContextMenuActions(storageService: IStorageService, isAccount: boolean): IAction[] {
-	const currentElementContextMenuActions: IAction[] = [];
-	if (isAccount) {
-		currentElementContextMenuActions.push(
-			toAction({ id: 'hideAccounts', label: localize('hideAccounts', "Hide Accounts"), run: () => setAccountsActionVisible(storageService, false) }),
-			new Separator()
-		);
-	}
+function simpleActivityContextMenuActions(_storageService: IStorageService, _isAccount: boolean): IAction[] {
 	return [
-		...currentElementContextMenuActions,
-		toAction({ id: 'toggle.hideAccounts', label: localize('accounts', "Accounts"), checked: isAccountsActionVisible(storageService), run: () => setAccountsActionVisible(storageService, !isAccountsActionVisible(storageService)) }),
 		toAction({ id: 'toggle.hideManage', label: localize('manage', "Manage"), checked: true, enabled: false, run: () => { throw new Error('"Manage" can not be hidden'); } })
 	];
 }
 
-export function isAccountsActionVisible(storageService: IStorageService): boolean {
-	return storageService.getBoolean(AccountsActivityActionViewItem.ACCOUNTS_VISIBILITY_PREFERENCE_KEY, StorageScope.PROFILE, true);
+export function isAccountsActionVisible(_storageService: IStorageService): boolean {
+	return false;
 }
 
-function setAccountsActionVisible(storageService: IStorageService, visible: boolean) {
-	storageService.store(AccountsActivityActionViewItem.ACCOUNTS_VISIBILITY_PREFERENCE_KEY, visible, StorageScope.PROFILE, StorageTarget.USER);
+function setAccountsActionVisible(storageService: IStorageService, _visible: boolean) {
+	storageService.store(AccountsActivityActionViewItem.ACCOUNTS_VISIBILITY_PREFERENCE_KEY, false, StorageScope.PROFILE, StorageTarget.USER);
 }
