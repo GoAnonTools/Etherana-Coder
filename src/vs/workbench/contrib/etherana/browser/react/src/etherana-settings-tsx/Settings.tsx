@@ -32,9 +32,11 @@ type Tab =
 	| 'localProviders'
 	| 'providers'
 	| 'featureOptions'
+	| 'privacy'
+	| 'skills'
+	| 'deployment'
 	| 'projectMemory'
 	| 'mcp'
-	| 'privacy'
 	| 'general'
 	| 'all';
 
@@ -1241,11 +1243,29 @@ export const Settings = () => {
 		{ tab: 'featureOptions', label: 'Feature Options' },
 		{ tab: 'privacy', label: 'Privacy Dashboard' },
 		{ tab: 'skills', label: 'Skills' },
+		{ tab: 'deployment', label: 'Deployment' },
 		{ tab: 'projectMemory', label: 'Project Memory' },
 		{ tab: 'mcp', label: 'MCP' },
 		{ tab: 'general', label: 'General' },
 		{ tab: 'all', label: 'All Settings' },
 	];
+	const deploymentPartners = [
+		{
+			name: 'Railway',
+			description: 'Launch fast, test quickly',
+			detail: 'Deploy apps quickly with a developer-friendly cloud platform. Great for testing, previews, and fast launches.',
+			url: 'https://railway.com?referralCode=Fu1d-u',
+			cta: 'Open Railway',
+		},
+		{
+			name: 'VPS.org',
+			description: 'Full control, secure VPS',
+			detail: 'Choose a secure VPS when you want full infrastructure control, predictable hosting, and a self-managed production setup.',
+			url: 'https://vps.org/?ref=RMADF9KX',
+			cta: 'Open VPS.org',
+		},
+	] as const;
+
 	const shouldShowTab = (tab: Tab) => selectedSection === 'all' || selectedSection === tab;
 
 	const accessor = useAccessor()
@@ -1871,6 +1891,51 @@ export const Settings = () => {
 												</div>
 											);
 										})}
+									</div>
+								</ErrorBoundary>
+							</div>
+
+
+
+
+							{/* Deployment section */}
+							<div className={shouldShowTab('deployment') ? `` : 'hidden'}>
+								<ErrorBoundary>
+									<div className='max-w-[760px]'>
+										<h2 className={`text-3xl mb-2`}>Deployment</h2>
+										<h4 className={`text-etherana-fg-3 mb-4`}>
+											<ChatMarkdownRender
+												inPTag={true}
+												string={`Deploy your projects with trusted partners. These partner links help keep Etherana Coder free while preserving your privacy.`}
+												chatMessageLocation={undefined}
+											/>
+										</h4>
+
+										<div className='text-etherana-fg-3 text-xs border border-etherana-border-1 rounded p-3 mb-4 bg-etherana-bg-1'>
+											Privacy-first default: Etherana makes no automatic partner calls. Affiliate links open only when you click a partner button.
+										</div>
+
+										<div className='flex flex-col gap-3'>
+											{deploymentPartners.map(partner => (
+												<div key={partner.name} className='border border-etherana-border-1 rounded p-4 bg-etherana-bg-1'>
+													<div className='flex flex-col gap-2'>
+														<div>
+															<h3 className='text-xl'>{partner.name}</h3>
+															<div className='text-sm text-etherana-fg-3 mt-1'>{partner.description}</div>
+															<div className='text-xs text-etherana-fg-3 mt-2'>{partner.detail}</div>
+														</div>
+														<EtheranaButtonBgDarken
+															className='px-4 py-1 w-fit mt-2'
+															onClick={() => {
+																window.open(partner.url, '_blank', 'noopener,noreferrer');
+															}}
+														>
+															{partner.cta}
+														</EtheranaButtonBgDarken>
+													</div>
+												</div>
+											))}
+										</div>
 									</div>
 								</ErrorBoundary>
 							</div>
