@@ -4,29 +4,29 @@
 	"releaseDate": "2026-06-18",
 	"channel": "stable",
 	"source": "https://github.com/GoAnonTools/Etherana-Coder",
-	"notes": "https://downloads.goanon.pro/releases/0.1.0/release-notes.md",
-	"privacySummary": "https://downloads.goanon.pro/releases/0.1.0/privacy-summary.md",
+	"notes": "https://coder-downloads.goanon.pro/releases/0.1.0/release-notes.md",
+	"privacySummary": "https://coder-downloads.goanon.pro/releases/0.1.0/privacy-summary.md",
 	"downloads": {
 		"linux-x64": {
 			"filename": "etherana-coder-linux-x64.tar.gz",
-			"url": "https://downloads.goanon.pro/releases/0.1.0/etherana-coder-linux-x64.tar.gz",
+			"url": "https://coder-downloads.goanon.pro/releases/0.1.0/etherana-coder-linux-x64.tar.gz",
 			"sha256": "9cbf9b2226ec7b5be9aa8148260966d9bc5ffdfedd7841925eb3d22985d59070"
 		},
 		"windows-x64": {
 			"filename": "etherana-coder-windows-x64.zip",
-			"url": "https://downloads.goanon.pro/releases/0.1.0/etherana-coder-windows-x64.zip",
+			"url": "https://coder-downloads.goanon.pro/releases/0.1.0/etherana-coder-windows-x64.zip",
 			"sha256": "TODO",
 			"status": "pending"
 		},
 		"macos-arm64": {
 			"filename": "etherana-coder-macos-arm64.zip",
-			"url": "https://downloads.goanon.pro/releases/0.1.0/etherana-coder-macos-arm64.zip",
+			"url": "https://coder-downloads.goanon.pro/releases/0.1.0/etherana-coder-macos-arm64.zip",
 			"sha256": "TODO",
 			"status": "pending"
 		},
 		"macos-x64": {
 			"filename": "etherana-coder-macos-x64.zip",
-			"url": "https://downloads.goanon.pro/releases/0.1.0/etherana-coder-macos-x64.zip",
+			"url": "https://coder-downloads.goanon.pro/releases/0.1.0/etherana-coder-macos-x64.zip",
 			"sha256": "TODO",
 			"status": "pending"
 		}
