@@ -1248,6 +1248,18 @@ export const Settings = () => {
 	];
 	const shouldShowTab = (tab: Tab) => selectedSection === 'all' || selectedSection === tab;
 
+	const accessor = useAccessor()
+	const commandService = accessor.get('ICommandService')
+	const environmentService = accessor.get('IEnvironmentService')
+	const nativeHostService = accessor.get('INativeHostService')
+	const settingsState = useSettingsState()
+	const etheranaSettingsService = accessor.get('IEtheranaSettingsService')
+	const chatThreadsService = accessor.get('IChatThreadService')
+	const notificationService = accessor.get('INotificationService')
+	const mcpService = accessor.get('IMCPService')
+	const storageService = accessor.get('IStorageService')
+	const metricsService = accessor.get('IMetricsService')
+
 	const [pendingSkillId, setPendingSkillId] = useState<EtheranaSkillId | null>(null);
 
 	const enabledSkills = settingsState.globalSettings.enabledSkills ?? [];
@@ -1288,18 +1300,6 @@ export const Settings = () => {
 
 		setPendingSkillId(null);
 	};
-
-	const accessor = useAccessor()
-	const commandService = accessor.get('ICommandService')
-	const environmentService = accessor.get('IEnvironmentService')
-	const nativeHostService = accessor.get('INativeHostService')
-	const settingsState = useSettingsState()
-	const etheranaSettingsService = accessor.get('IEtheranaSettingsService')
-	const chatThreadsService = accessor.get('IChatThreadService')
-	const notificationService = accessor.get('INotificationService')
-	const mcpService = accessor.get('IMCPService')
-	const storageService = accessor.get('IStorageService')
-	const metricsService = accessor.get('IMetricsService')
 
 	const onDownload = (t: 'Chats' | 'Settings') => {
 		let dataStr: string

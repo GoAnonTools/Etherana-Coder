@@ -10,7 +10,7 @@ import { SafetyMode, safetyModes, displayInfoOfSafetyMode } from '../../../../co
 import { getModelCapabilities, getIsReasoningEnabledState } from '../../../../common/modelCapabilities.js';
 import { StagingSelectionItem } from '../../../../common/chatThreadServiceTypes.js';
 import { useAccessor, useChatThreadsState, useChatThreadsStreamState, useSettingsState, useCommandBarState } from '../../util/services.js';
-import { builtinEtheranaSkills } from '../../../../../common/etheranaSkills.js';
+import { builtinEtheranaSkills } from '../../../../common/etheranaSkills.js';
 import { EtheranaCustomDropdownBox, EtheranaSlider, EtheranaSwitch } from '../../util/inputs.js';
 import { ModelDropdown } from '../../etherana-settings-tsx/ModelDropdown.js';
 import { IconArrowUp, IconSquare, IconX, ButtonSubmit, ButtonStop } from './ChatIcons.js';
