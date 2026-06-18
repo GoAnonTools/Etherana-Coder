@@ -29,3 +29,10 @@ src/vs/workbench/contrib/etherana/browser/react/out/**
 src/vs/workbench/contrib/etherana/browser/react/src2/**
 src/vs/workbench/contrib/etherana/browser/react/src2/
 
+
+# Release artifacts are uploaded to R2, not committed to Git
+release/**/*.tar.gz
+release/**/*.zip
+release/**/*.AppImage
+release/**/*.deb
+release/**/*.rpm
