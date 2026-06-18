@@ -697,8 +697,12 @@ export class ExtensionsViewPaneContainer extends ViewPaneContainer implements IE
 		}
 		this.searchBox?.layout(new Dimension(dimension.width - 34 - /*padding*/8 - (24 * 2), 20));
 		const searchBoxHeight = 20 + 21 /*margin*/;
-		const headerHeight = this.header && !!this.notificationContainer?.childNodes.length ? this.notificationContainer.clientHeight + searchBoxHeight + 10 /*margin*/ : searchBoxHeight;
+		const notificationHeight = this.header && !!this.notificationContainer?.childNodes.length ? this.notificationContainer.clientHeight + 10 /*margin*/ : 0;
+		const privacyWarning = this.header?.querySelector<HTMLElement>('.extensions-privacy-warning');
+		const privacyWarningHeight = privacyWarning ? privacyWarning.offsetHeight + 6 /*margin*/ : 0;
+		const headerHeight = searchBoxHeight + notificationHeight + privacyWarningHeight;
 		this.header!.style.height = `${headerHeight}px`;
+		this.root?.style.setProperty('--etherana-extensions-header-height', `${headerHeight}px`);
 		super.layout(new Dimension(dimension.width, dimension.height - headerHeight));
 	}
 

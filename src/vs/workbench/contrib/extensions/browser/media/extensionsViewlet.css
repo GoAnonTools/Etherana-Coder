@@ -6,6 +6,7 @@
 .extensions-viewlet {
 	position: relative;
 	height: 100%;
+	--etherana-extensions-header-height: 41px;
 }
 
 .extensions-viewlet .hidden {
@@ -23,7 +24,7 @@
 }
 
 .extensions-viewlet > .header {
-	height: 41px;
+	height: var(--etherana-extensions-header-height);
 	box-sizing: border-box;
 	padding: 5px 12px 6px 20px;
 }
@@ -92,7 +93,7 @@
 }
 
 .extensions-viewlet > .extensions {
-	height: calc(100% - 41px);
+	height: calc(100% - var(--etherana-extensions-header-height));
 }
 
 .extensions-viewlet > .extensions .extension-list-item .monaco-action-bar,
@@ -202,7 +203,8 @@
 
 /* Etherana Coder: third-party extension privacy warning */
 .extensions-viewlet > .header > .extensions-privacy-warning {
-	margin: 6px 20px 0 20px;
+	box-sizing: border-box;
+	margin: 6px 0 0 0;
 	padding: 6px 8px;
 	border: 1px solid var(--vscode-inputValidation-warningBorder, rgba(255, 193, 7, 0.35));
 	border-radius: 4px;
