@@ -8,6 +8,7 @@ import { IEditorService } from '../../../services/editor/common/editorService.js
 import { ChatMessage } from '../common/chatThreadServiceTypes.js';
 import { getIsReasoningEnabledState, getReservedOutputTokenSpace, getModelCapabilities } from '../common/modelCapabilities.js';
 import { reParsedToolXMLString, chat_systemMessage } from '../common/prompt/prompts.js';
+import { getEtheranaSkillPrompt } from '../common/etheranaSkills.js';
 import { AnthropicLLMChatMessage, AnthropicReasoning, GeminiLLMChatMessage, LLMChatMessage, LLMFIMMessage, OpenAILLMChatMessage, RawToolParamsObj } from '../common/sendLLMMessageTypes.js';
 import { IEtheranaSettingsService } from '../common/etheranaSettingsService.js';
 import { FeatureName, ModelSelection, ProviderName } from '../common/etheranaSettingsTypes.js';
@@ -603,8 +604,9 @@ class ConvertToLLMMessageService extends Disposable implements IConvertToLLMMess
 			}
 		}))
 
-		const { useCustomSystemPrompt, customSystemPrompt } = this.etheranaSettingsService.state.globalSettings;
-		const systemMessage = chat_systemMessage({ workspaceFolders, openedURIs, directoryStr, activeURI, persistentTerminalIDs, terminalMemory, safetyMode, mcpTools, includeXMLToolDefinitions, customPrompt: useCustomSystemPrompt ? customSystemPrompt : undefined })
+		const { useCustomSystemPrompt, customSystemPrompt, enabledSkills } = this.etheranaSettingsService.state.globalSettings;
+		const skillPrompt = getEtheranaSkillPrompt(enabledSkills);
+		const systemMessage = chat_systemMessage({ workspaceFolders, openedURIs, directoryStr, activeURI, persistentTerminalIDs, terminalMemory, safetyMode, mcpTools, includeXMLToolDefinitions, customPrompt: useCustomSystemPrompt ? customSystemPrompt : undefined, skillPrompt })
 		return systemMessage
 	}
 

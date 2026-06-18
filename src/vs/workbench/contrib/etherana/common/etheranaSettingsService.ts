@@ -308,6 +308,11 @@ class EtheranaSettingsService extends Disposable implements IEtheranaSettingsSer
 				readS.globalSettings.customSystemPrompt = defaultGlobalSettings.customSystemPrompt;
 			}
 
+			// add enabledSkills feature
+			if (!Array.isArray(readS.globalSettings.enabledSkills)) {
+				readS.globalSettings.enabledSkills = defaultGlobalSettings.enabledSkills;
+			}
+
 			// add autoAcceptLLMChanges feature
 			if (readS.globalSettings.autoAcceptLLMChanges === undefined) readS.globalSettings.autoAcceptLLMChanges = false;
 

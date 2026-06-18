@@ -4,6 +4,8 @@
  *  Licensed under the Apache License, Version 2.0. See LICENSE.txt for more information.
  *--------------------------------------------------------------------------------------*/
 
+import type { EtheranaSkillId } from './etheranaSkills.js';
+
 import { defaultModelsOfProvider, defaultProviderSettings, ModelOverrides } from './modelCapabilities.js';
 import { ToolApprovalType } from './toolsServiceTypes.js';
 import { EtheranaSettingsState } from './etheranaSettingsService.js'
@@ -454,6 +456,7 @@ export type GlobalSettings = {
 	disableSystemMessage: boolean;
 	useCustomSystemPrompt: boolean;
 	customSystemPrompt: string;
+	enabledSkills: EtheranaSkillId[];
 	autoAcceptLLMChanges: boolean;
 	autoPushAfterCommit: boolean;
 	terminalMemory: {
@@ -488,6 +491,7 @@ export const defaultGlobalSettings: GlobalSettings = {
 	disableSystemMessage: false,
 	useCustomSystemPrompt: false,
 	customSystemPrompt: '',
+	enabledSkills: [],
 	autoAcceptLLMChanges: false,
 	autoPushAfterCommit: false,
 	terminalMemory: {

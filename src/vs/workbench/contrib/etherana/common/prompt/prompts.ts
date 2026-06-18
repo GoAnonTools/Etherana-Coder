@@ -427,7 +427,7 @@ const systemToolsXMLPrompt = (safetyMode: SafetyMode, mcpTools: InternalToolInfo
 // ======================================================== chat (normal, gather, agent) ========================================================
 
 
-export const chat_systemMessage = ({ workspaceFolders, openedURIs, activeURI, persistentTerminalIDs, terminalMemory, directoryStr, safetyMode: mode, mcpTools, includeXMLToolDefinitions, customPrompt }: { workspaceFolders: string[], directoryStr: string, openedURIs: string[], activeURI: string | undefined, persistentTerminalIDs: string[], terminalMemory: { id: string, output: string }[], safetyMode: SafetyMode, mcpTools: InternalToolInfo[] | undefined, includeXMLToolDefinitions: boolean, customPrompt?: string }) => {
+export const chat_systemMessage = ({ workspaceFolders, openedURIs, activeURI, persistentTerminalIDs, terminalMemory, directoryStr, safetyMode: mode, mcpTools, includeXMLToolDefinitions, customPrompt, skillPrompt }: { workspaceFolders: string[], directoryStr: string, openedURIs: string[], activeURI: string | undefined, persistentTerminalIDs: string[], terminalMemory: { id: string, output: string }[], safetyMode: SafetyMode, mcpTools: InternalToolInfo[] | undefined, includeXMLToolDefinitions: boolean, customPrompt?: string, skillPrompt?: string }) => {
 	const header = (`You are an expert coding ${mode === 'agent' ? 'agent' : mode === 'edit' ? 'editor' : 'observer'} whose job is \
 ${mode === 'agent' ? `to help the user develop, run, and make changes to their codebase.`
 			: mode === 'edit' ? `to help the user make approved changes to their codebase.`
@@ -525,6 +525,7 @@ ${details.map((d, i) => `${i + 1}. ${d}`).join('\n\n')}`)
 	} else {
 		ansStrs.push(header)
 	}
+	if (skillPrompt) ansStrs.push(skillPrompt)
 	ansStrs.push(sysInfo)
 	if (toolDefinitions) ansStrs.push(toolDefinitions)
 	if (!customPrompt) {

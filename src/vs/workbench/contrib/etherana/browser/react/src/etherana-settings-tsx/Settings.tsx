@@ -5,6 +5,8 @@
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'; // Added useRef import just in case it was missed, though likely already present
 import { ProviderName, SettingName, displayInfoOfSettingName, providerNames, EtheranaStatefulModelInfo, customSettingNamesOfProvider, RefreshableProviderName, refreshableProviderNames, displayInfoOfProviderName, nonlocalProviderNames, localProviderNames, GlobalSettingName, featureNames, displayInfoOfFeatureName, isProviderNameDisabled, FeatureName, hasDownloadButtonsOnModelsProviderNames, subTextMdOfProviderName, defaultGlobalSettings } from '../../../../common/etheranaSettingsTypes.js'
+import { builtinEtheranaSkills } from '../../../../common/etheranaSkills.js'
+import type { EtheranaSkillId } from '../../../../common/etheranaSkills.js'
 import ErrorBoundary from '../sidebar-tsx/ErrorBoundary.js'
 import { EtheranaButtonBgDarken, EtheranaCustomDropdownBox, EtheranaInputBox2, EtheranaSimpleInputBox, EtheranaSlider, EtheranaSwitch } from '../util/inputs.js'
 import { useAccessor, useIsDark, useRefreshModelListener, useRefreshModelState, useSettingsState } from '../util/services.js'
@@ -1238,12 +1240,51 @@ export const Settings = () => {
 		{ tab: 'providers', label: 'Main Providers' },
 		{ tab: 'featureOptions', label: 'Feature Options' },
 		{ tab: 'privacy', label: 'Privacy Dashboard' },
+		{ tab: 'skills', label: 'Skills' },
 		{ tab: 'projectMemory', label: 'Project Memory' },
 		{ tab: 'mcp', label: 'MCP' },
 		{ tab: 'general', label: 'General' },
 		{ tab: 'all', label: 'All Settings' },
 	];
 	const shouldShowTab = (tab: Tab) => selectedSection === 'all' || selectedSection === tab;
+
+	const [pendingSkillId, setPendingSkillId] = useState<EtheranaSkillId | null>(null);
+
+	const enabledSkills = settingsState.globalSettings.enabledSkills ?? [];
+
+	const setEnabledSkills = (newEnabledSkills: EtheranaSkillId[]) => {
+		etheranaSettingsService.setGlobalSetting('enabledSkills', newEnabledSkills);
+	};
+
+	const onSkillToggle = (skillId: EtheranaSkillId, enabled: boolean) => {
+		if (!enabled) {
+			setEnabledSkills(enabledSkills.filter(id => id !== skillId));
+			if (pendingSkillId === skillId) setPendingSkillId(null);
+			return;
+		}
+
+		if (enabledSkills.includes(skillId)) return;
+
+		if (enabledSkills.length > 0) {
+			setPendingSkillId(skillId);
+			return;
+		}
+
+		setEnabledSkills([skillId]);
+	};
+
+	const enablePendingSkill = (replaceOthers: boolean) => {
+		if (!pendingSkillId) return;
+
+		if (replaceOthers) {
+			setEnabledSkills([pendingSkillId]);
+		} else {
+			setEnabledSkills([...enabledSkills.filter(id => id !== pendingSkillId), pendingSkillId]);
+		}
+
+		setPendingSkillId(null);
+	};
+
 	const accessor = useAccessor()
 	const commandService = accessor.get('ICommandService')
 	const environmentService = accessor.get('IEnvironmentService')
@@ -1758,6 +1799,70 @@ export const Settings = () => {
 								</div>
 
 							</div>
+
+							{/* Skills section */}
+							<div className={shouldShowTab('skills') ? `` : 'hidden'}>
+								<ErrorBoundary>
+									<div className='max-w-[760px]'>
+										<h2 className={`text-3xl mb-2`}>Skills</h2>
+										<h4 className={`text-etherana-fg-3 mb-4`}>
+											<ChatMarkdownRender inPTag={true} string={`Optional model-agnostic skills. Skills add focused instructions to Etherana's prompt and work with any selected model.`} chatMessageLocation={undefined} />
+										</h4>
+
+										<div className='text-etherana-fg-3 text-xs border border-etherana-border-1 rounded p-3 mb-4 bg-etherana-bg-1'>
+											Best results: use one skill at a time. Multiple skills can make instructions compete with each other.
+										</div>
+
+										{pendingSkillId && (
+											<div className='border border-etherana-border-1 rounded p-3 mb-4 bg-etherana-bg-1'>
+												<div className='text-sm mb-3'>
+													You already have another skill enabled. For best results, use one skill at a time.
+												</div>
+												<div className='flex flex-wrap gap-2'>
+													<EtheranaButtonBgDarken className='px-3 py-1' onClick={() => enablePendingSkill(true)}>
+														Turn off other skills
+													</EtheranaButtonBgDarken>
+													<EtheranaButtonBgDarken className='px-3 py-1' onClick={() => enablePendingSkill(false)}>
+														Enable anyway
+													</EtheranaButtonBgDarken>
+													<EtheranaButtonBgDarken className='px-3 py-1' onClick={() => setPendingSkillId(null)}>
+														Cancel
+													</EtheranaButtonBgDarken>
+												</div>
+											</div>
+										)}
+
+										{(['development', 'create'] as const).map(category => {
+											const skills = builtinEtheranaSkills.filter(skill => skill.category === category);
+											return (
+												<div key={category} className='mb-6'>
+													<h3 className='text-xl mb-2'>{category === 'development' ? 'Development' : 'Create'}</h3>
+													<div className='flex flex-col gap-3'>
+														{skills.map(skill => (
+															<div key={skill.id} className='border border-etherana-border-1 rounded p-3 bg-etherana-bg-1'>
+																<div className='flex items-start gap-x-3'>
+																	<EtheranaSwitch
+																		size='xs'
+																		value={enabledSkills.includes(skill.id)}
+																		onChange={(value) => onSkillToggle(skill.id, value)}
+																	/>
+																	<div>
+																		<div className='text-sm'>{skill.name}</div>
+																		<div className='text-etherana-fg-3 text-xs mt-1'>{skill.description}</div>
+																		<div className='text-etherana-fg-3 text-[10px] mt-2'>ID: {skill.id}</div>
+																	</div>
+																</div>
+															</div>
+														))}
+													</div>
+												</div>
+											);
+										})}
+									</div>
+								</ErrorBoundary>
+							</div>
+
+
 
 							{/* Project Memory section */}
 							<div className={shouldShowTab('projectMemory') ? `` : 'hidden'}>
