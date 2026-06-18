@@ -10,6 +10,7 @@ import { SafetyMode, safetyModes, displayInfoOfSafetyMode } from '../../../../co
 import { getModelCapabilities, getIsReasoningEnabledState } from '../../../../common/modelCapabilities.js';
 import { StagingSelectionItem } from '../../../../common/chatThreadServiceTypes.js';
 import { useAccessor, useChatThreadsState, useChatThreadsStreamState, useSettingsState, useCommandBarState } from '../../util/services.js';
+import { builtinEtheranaSkills } from '../../../../../common/etheranaSkills.js';
 import { EtheranaCustomDropdownBox, EtheranaSlider, EtheranaSwitch } from '../../util/inputs.js';
 import { ModelDropdown } from '../../etherana-settings-tsx/ModelDropdown.js';
 import { IconArrowUp, IconSquare, IconX, ButtonSubmit, ButtonStop } from './ChatIcons.js';
@@ -72,6 +73,28 @@ const SafetyModeDropdown = ({ className }: { className: string }) => {
 	);
 };
 
+
+const ActiveSkillsIndicator = () => {
+	const settingsState = useSettingsState();
+	const enabledSkills = settingsState.globalSettings.enabledSkills ?? [];
+	const activeSkillNames = builtinEtheranaSkills
+		.filter(skill => enabledSkills.includes(skill.id))
+		.map(skill => skill.name);
+
+	if (!activeSkillNames.length) return null;
+
+	const activeSkillsText = activeSkillNames.join(', ');
+
+	return (
+		<div
+			className='text-[10px] text-etherana-fg-3 bg-etherana-bg-1 border border-etherana-border-2 rounded py-0.5 px-2 truncate max-w-full'
+			title={`Active skills: ${activeSkillsText}`}
+		>
+			Active skills: {activeSkillsText}
+		</div>
+	);
+}
+
 export const EtheranaChatArea: React.FC<any> = ({
 	children, onSubmit, onAbort, onClose, onClickAnywhere, divRef, isStreaming = false, isDisabled = false, className = '', showModelDropdown = true, showSelections = false, showProspectiveSelections = false, selections, setSelections, featureName, loadingIcon,
 }) => (
@@ -84,6 +107,7 @@ export const EtheranaChatArea: React.FC<any> = ({
 					<ReasoningOptionSlider featureName={featureName} />
 					<div className='flex items-center flex-wrap gap-x-2 gap-y-1 text-nowrap '>
 						{featureName === 'Chat' && <SafetyModeDropdown className='text-xs text-etherana-fg-3 bg-etherana-bg-1 border border-etherana-border-2 rounded py-0.5 px-1' />}
+						{featureName === 'Chat' && <ActiveSkillsIndicator />}
 						<ModelDropdown featureName={featureName} className='text-xs text-etherana-fg-3 bg-etherana-bg-1 rounded' />
 					</div>
 				</div>
