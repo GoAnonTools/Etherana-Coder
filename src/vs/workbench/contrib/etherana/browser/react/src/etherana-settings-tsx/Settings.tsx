@@ -1251,6 +1251,10 @@ export const Settings = () => {
 	const [pendingSkillId, setPendingSkillId] = useState<EtheranaSkillId | null>(null);
 
 	const enabledSkills = settingsState.globalSettings.enabledSkills ?? [];
+	const activeSkillNames = builtinEtheranaSkills
+		.filter(skill => enabledSkills.includes(skill.id))
+		.map(skill => skill.name);
+	const activeSkillsSummary = activeSkillNames.length ? activeSkillNames.join(', ') : 'None';
 
 	const setEnabledSkills = (newEnabledSkills: EtheranaSkillId[]) => {
 		etheranaSettingsService.setGlobalSetting('enabledSkills', newEnabledSkills);
@@ -1811,6 +1815,15 @@ export const Settings = () => {
 
 										<div className='text-etherana-fg-3 text-xs border border-etherana-border-1 rounded p-3 mb-4 bg-etherana-bg-1'>
 											Best results: use one skill at a time. Multiple skills can make instructions compete with each other.
+										</div>
+
+										<div className='border border-etherana-border-1 rounded p-3 mb-4 bg-etherana-bg-1'>
+											<div className='text-sm'>Active skills: {activeSkillsSummary}</div>
+											{enabledSkills.length > 0 && (
+												<EtheranaButtonBgDarken className='px-3 py-1 mt-3' onClick={() => setEnabledSkills([])}>
+													Turn off all skills
+												</EtheranaButtonBgDarken>
+											)}
 										</div>
 
 										{pendingSkillId && (
