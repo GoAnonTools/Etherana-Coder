@@ -1,0 +1,10 @@
+{
+  "name": "Etherana Coder",
+  "latest": "0.1.0",
+  "channel": "stable",
+  "manifest": "https://downloads.goanon.pro/releases/0.1.0/manifest.json",
+  "autoUpdate": {
+    "enabled": false,
+    "policy": "manual-download-only"
+  }
+}
